@@ -1,95 +1,84 @@
 #include <iostream>
-//#include <vector>
-#include <string>
+#include <vector>
+#include <iomanip>
 
 using namespace std;
 
 class Item
 {
 public:
-    int id;
     string name;
-    Item(int id, string name) : name{name}, id{id} {}
+    Item(string name) : name{name} {}
 };
 
-class Inventory
+
+class Equipment
 {
-public:
-    Item*** tab;
+private:
+    Item*** grid;
     int rows;
     int cols;
-    Inventory(int rows = 5, int cols = 5) : rows{rows}, cols{cols}
+public:
+
+    Equipment(int rows = 5, int cols = 5) : rows{rows}, cols{cols}
     {
-        tab = new Item**[rows];
-        int a = 0;
-        for(int i = 0; i < rows; i++)
+        grid = new Item**[rows];
+        for (int i = 0; i < rows; i++)
         {
-            tab[i] = new Item*[cols];
+            grid[i] = new Item*[cols];
         }
 
-        for(int i = 0; i < rows; i++)
+        int count = 0;
+        for (int i = 0; i < rows; i++)
         {
-            for(int j = 0; j < cols; j++)
+            for (int j = 0; j < cols; j++)
             {
-                tab[i][j] = new Item(a, "NAN");
-                a++;
+                grid[i][j] = new Item("Item " + to_string((count)));
+                count++;
             }
         }
     }
-    ~Inventory()
-    {
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                delete tab[i][j];
-            }
-        }
-        for(int i = 0; i < rows; i++)
-        {
-            delete[] tab[i];
-        }
-        delete[] tab;
 
-    }
-    void display_name()
+    ~Equipment()
     {
-        for(int i = 0; i < rows; i++)
+        for (int i = 0; i < rows; i++)
         {
-            for(int j = 0; j < cols; j++)
+            for (int j = 0; j < cols; j++)
             {
-                if(tab[i][j]->name == "NAN")
-                {
-                    cout << "[]\t";
-                }
-                else
-                {
-                    cout << "[" << tab[i][j]->name << "]\t";
-                }
+                delete grid[i][j];
             }
-            cout << endl;
         }
-    }
-    void display_id()
-    {
-        for(int i = 0; i < rows; i++)
+        for (int i = 0; i < rows; i++)
         {
-            for(int j = 0; j < cols; j++)
+            delete[] grid[i];
+        }
+        delete[] grid;
+    }
+
+    void display()
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
             {
-                cout << "[" << tab[i][j]->id << "]\t";
+                if(j == 0)
+                {
+                    cout << setw(5);
+                }
+                cout << "[" << /*grid[i][j]->name*/ << "]" << setw(5);
             }
             cout << endl;
         }
     }
 
 };
-
 
 int main()
 {
-    //auto sth = new Inventory();
-    //sth->display_name();
-    Inventory something(4, 9);
-    something.display_name();
+
+    Equipment E(8, 8);
+    E.display();
+
     return 0;
+
 }
