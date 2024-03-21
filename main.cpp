@@ -1,15 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <iomanip>
+#include "item.h"
 
 using namespace std;
-
-class Item
-{
-public:
-    string name;
-    Item(string name) : name{name} {}
-};
 
 
 class Equipment
@@ -65,7 +59,7 @@ public:
                 {
                     cout << setw(5);
                 }
-                cout << "[" << /*grid[i][j]->name*/ << "]" << setw(5);
+                cout << "[" << grid[i][j]->name << "]" << setw(3);
             }
             cout << endl;
         }
