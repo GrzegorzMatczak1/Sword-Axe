@@ -5,7 +5,9 @@
 #include <cctype> //I KNOW THAT THE INCLUDES ARE VERRY MESSY
 #include <cstdlib>
 #include <stdlib.h>
-#include <time.h>
+#include <memory>
+
+
 
 using namespace std;
 
@@ -63,7 +65,7 @@ public:
     Inventory(int rows = 4, int cols = 9) : rows{rows}, cols{cols} //Inventory Constructor
     {
         tab = new Item**[rows];
-        letters = "ABCDEFGHIJKRSTUVWXYZ";
+        letters = "ABCDEFGHIJKRSTUVWYZ";
         int a = 0;
         for(int i = 0; i < rows; i++)
         {
@@ -179,88 +181,189 @@ public:
         int row_trans1 = translate_rows(row_cords1_upper); //translating A, B to numbers so it would be 1, 2
         int row_trans2 = translate_rows(row_cords2_upper);
 
-        if(row_trans1 == -1 or row_trans2 == -1)
+        int col_cords1_smol = col_cords1 - 1;
+        int col_cords2_smol = col_cords2 - 1;
+
+        unique_ptr<int[]> free_spot(new int[2]);
+
+
+        string* slot_type_list = new string[7];
+        slot_type_list[0] = "helmet";
+        slot_type_list[1] = "chestplate";
+        slot_type_list[2] = "leggings";
+        slot_type_list[3] = "boots";
+        slot_type_list[4] = "weapon";
+        slot_type_list[5] = "shield";
+        slot_type_list[6] = "general";
+
+        //cout<<"GOT HERE1" << endl;
+
+        if(((row_trans1 == -1) && (row_cords1_upper != 'X')) || ((row_trans2 == -1) && (row_cords2_upper != 'X')))
         {
             cout << "Incorrect row value! You should enter cordinates like in chess for example: a1, b3" << endl;
+
         }
-        else if(row_trans1 > rows or row_trans2 > rows)
-        {
-            cout << "Row input to big" << endl;
-        }
-        else if(col_cords1 > cols or col_cords2 > cols)
-        {
-            cout << "Cols input to big" << endl;
-        }
-        else if(row_cords1_upper == 'X' and row_cords2_upper == 'X')
+
+        else if((row_cords1_upper == 'X') && (row_cords2_upper == 'X'))
         {
             cout << "YOU CAN NOT SWAP ITEMS IN THIS INVENTORY" << endl;
+
         }
+        //cout<<"GOT HERE2" << endl;
         else if(row_cords1_upper == 'X')
         {
-            if(battle_slots[col_cords1 - 1]->slot_type == tab[row_trans2 - 1][col_cords2 - 1]->slot_type)
+            if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "helmet") && (slot_type_list[col_cords1 - 1] == "helmet"))
             {
-                if(battle_slots[col_cords1 - 1]->item_type == "axe")
+                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+            }
+            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "chestplate") && (slot_type_list[col_cords1 - 1] == "chestplate"))
+            {
+                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+            }
+            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "leggings") && (slot_type_list[col_cords1 - 1] == "leggings"))
+            {
+                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+            }
+            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "boots") && (slot_type_list[col_cords1 - 1] == "boots"))
+            {
+                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+            }
+            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "weapon") && (slot_type_list[col_cords1 - 1] == "weapon"))
+            {
+
+
+                if(tab[row_trans2 - 1][col_cords2 - 1]->item_type == "axe")
                 {
                     int* free_spot = find_smallest_free_spot();
-                    if(free_spot[0] == -1 or free_spot[1] == -1)
+
+
+                    if((free_spot[0] == -1) || (free_spot[1] == -1))
                     {
                         cout << "INVENTORY IS FULL CAN NOT SWAP ITEM AXE WITH SHIELD" << endl;
+
                     }
                     else
                     {
                         swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
                         swap(battle_slots[5], tab[free_spot[0]][free_spot[1]]);                    //DONT LISTEN TO POTETNIAL MEMORY LEAKS
+
                     }
                 }
                 else
                 {
                     swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+
                 }
 
+            }
+            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "shield") && (slot_type_list[col_cords1 - 1] == "shield"))
+            {
+                if(battle_slots[4]->item_type == "axe")
+                {
+                    cout << "CANNOT SWAP ITEMS. AXE IS EQUIPED" << endl;
+                }
+                else
+                {
+                    swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
+                }
             }
             else
             {
                 cout << "CANNOT SWAP ITEMS. WRONG ITEM TYPE" << endl;
+
             }
         }
+        //cout<<"GOT HERE3" << endl;
         else if(row_cords2_upper == 'X')
-            if(battle_slots[col_cords2 - 1]->slot_type == tab[row_trans1 - 1][col_cords1 - 1]->slot_type)
+        {
+            //cout<<"GOT HERE11" << endl;
+            if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "helmet") && (slot_type_list[col_cords2 - 1] == "helmet"))  // this part crashes my program HERE
+            {
+                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+            }
+            //cout<<"GOT HERE12" << endl;
+            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "chestplate") && (slot_type_list[col_cords2 - 1] == "chestplate"))
+            {
+                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+            }
+            //cout<<"GOT HERE13" << endl;
+            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "leggings") && (slot_type_list[col_cords2 - 1] == "leggings"))
+            {
+                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+            }
+            //cout<<"GOT HERE14" << endl;
+            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "boots") && (slot_type_list[col_cords2 - 1] == "boots"))
+            {
+                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+            }
+            //cout<<"GOT HERE15" << endl;
+            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "weapon") && (slot_type_list[col_cords2 - 1] == "weapon"))
             {
 
-                if(battle_slots[col_cords2 - 1]->item_type == "axe")
+                if(tab[row_trans1 - 1][col_cords1 - 1]->item_type == "axe")
                 {
-                    int* free_spot = find_smallest_free_spot();
-                    if(free_spot[0] == -1 or free_spot[1] == -1)
+
+                    if((free_spot[0] == -1) || (free_spot[1] == -1))
                     {
                         cout << "INVENTORY IS FULL CAN NOT SWAP ITEM" << endl;
+
                     }
                     else
                     {
-                        swap(battle_slots[col_cords2 - 1], tab[row_trans1 - 1][col_cords1 - 1]);
+                        swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
                         swap(battle_slots[5], tab[free_spot[0]][free_spot[1]]);                 //DONT LISTEN TO POTETNIAL MEMORY LEAKS
+
                     }
                 }
                 else
                 {
-                    swap(battle_slots[col_cords2 - 1], tab[row_trans1 - 1][col_cords1 - 1]);;
+                    //cout<<"GOT HERE6" << endl;
+                    swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+                    //cout<<"GOT HERE7" << endl;
                 }
-
             }
-            else
+            //cout<<"GOT HERE16" << endl;
+            if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == slot_type_list[5]) && (slot_type_list[col_cords2 - 1] == slot_type_list[5]))
+            {
+                if(battle_slots[4]->item_type == "axe")
+                {
+                    cout << "CANNOT SWAP ITEMS. AXE IS EQUIPED" << endl;
+                }
+                else
+                {
+                    swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
+                }
+            }
+            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == slot_type_list[6]))
             {
                 cout << "CANNOT SWAP ITEMS. WRONG ITEM TYPE" << endl;
+
+
             }
+        }
+        //cout<<"GOT HERE4" << endl;
+        else if((row_trans1 > rows) || (row_trans2 > rows))
+        {
+            cout << "Row input to big" << endl;
+
+        }
+        //cout<<"GOT HERE5" << endl;
+        else if((col_cords1 > cols) || (col_cords2 > cols))
+        {
+            cout << "Cols input to big" << endl;
+
+        }
 
         else
         {
             swap(tab[row_trans1 - 1][col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]); // Almost forgot to swich the rows_cords to translated ones XDDD
+
         }
     }
 
     int* find_smallest_free_spot()
     {
-        int* cords;
-        cords = new int[2];
+        int* cords = new int[2];
         for(int i = 0; i < rows; i++)
         {
             for(int j = 0; j < cols; j++)
@@ -277,7 +380,7 @@ public:
         cords[1] = -1;
         return cords;
     }
-                            //had to add id because i had to :(
+    //had to add id because i had to :(
     void add_specific_item(int id = 0, string name = "NAN", string display_name = "!", string item_type = "general", string slot_type = "NAN", int base_damage = 0, int base_defence = 0, string quality = "normal", int amount = 1, int durability = 10, string trait1 = "NAN", string trait2 = "NAN", string trait3 = "NAN", string trait4 = "NAN")
     {
         int* smallest_item = find_smallest_free_spot();
@@ -330,9 +433,7 @@ public:
 
 
 
-            string name = names_list[time(0) % 11];
-
-            rand();
+            string name = names_list[arc4random() % 11];
 
 
             //display names
@@ -346,8 +447,7 @@ public:
 
 
 
-
-            string display_name = display_names_list[time(0) % 6];
+            string display_name = display_names_list[arc4random() % 6];
 
             //slot types
             slot_type_list = new string[7];
@@ -360,7 +460,8 @@ public:
             slot_type_list[6] = "shield";
 
 
-            string slot_type = slot_type_list[time(0) % 7];
+
+            string slot_type = slot_type_list[arc4random() % 7];
 
             //item types
             string item_type;
@@ -372,7 +473,7 @@ public:
                 item_type_list[0] = "axe";
                 item_type_list[1] = "sword";
 
-                item_type = item_type_list[time(0) % 2];
+                item_type = item_type_list[arc4random() % 2];
             }
             else if(slot_type == "shield")
             {
@@ -404,12 +505,12 @@ public:
 
             if(slot_type == "weapon")
             {
-                base_damage = time(0) % 21;
+                base_damage = arc4random() % 21;
 
             }
             else if(slot_type != "NAN" and slot_type != "weapon")
             {
-                base_defence = time(0) % 21;
+                base_defence = arc4random() % 21;
             }
 
 
@@ -425,7 +526,7 @@ public:
 
 
 
-            int rarity = time(0) % 101;
+            int rarity = arc4random() % 101;
             if(rarity > 0 and rarity <= 20)
             {
                 quality = quality_list[0];
@@ -453,7 +554,7 @@ public:
 
             int amount = 1;
 
-            int durability = 10 + (time(0) % 51);
+            int durability = 10 + (arc4random() % 51);
 
             string* trait_list;
             trait_list = new string[16];
@@ -474,10 +575,10 @@ public:
             trait_list[14] = "made in china";
             trait_list[15] = "rusty";
 
-            int traits_random_num1 = time(0) % 101;
-            int traits_random_num2 = time(0) % 101;
-            int traits_random_num3= time(0) % 101;
-            int traits_random_num4 = time(0) % 101;
+            int traits_random_num1 = arc4random() % 101;
+            int traits_random_num2 = arc4random() % 101;
+            int traits_random_num3= arc4random() % 101;
+            int traits_random_num4 = arc4random() % 101;
             string trait1 = "NAN";
             string trait2 = "NAN";
             string trait3 = "NAN";
@@ -485,24 +586,24 @@ public:
 
             if(traits_random_num1 == 14 or traits_random_num1 == 71 or traits_random_num1 == 33)
             {
-                trait1 = trait_list[time(0) % 16];
+                trait1 = trait_list[arc4random() % 16];
             }
             if(traits_random_num2 == 4 or traits_random_num2 == 20 or traits_random_num2 == 69)
             {
-                trait2 = trait_list[time(0) % 16];
+                trait2 = trait_list[arc4random() % 16];
             }
             if(traits_random_num3 == 98 or traits_random_num3 == 43 or traits_random_num3 == 34)
             {
-                trait3 = trait_list[time(0) % 16];
+                trait3 = trait_list[arc4random() % 16];
             }
             if(traits_random_num4 == 8 or traits_random_num4 == 16 or traits_random_num4 == 32)
             {
-                trait4 = trait_list[time(0) % 16];
+                trait4 = trait_list[arc4random() % 16];
             }
 
 
 
-            int id = time(0) % 101;
+            int id = arc4random() % 101;
 
 
 
@@ -609,43 +710,50 @@ public:
             {
                 cout << "Name: " << tab[row_trans][col_cords]->name << endl;
 
-            cout << "Item type: " << tab[row_trans][col_cords]->item_type << endl;
-            if(tab[row_trans][col_cords]->slot_type != "NAN")
-            {
-                cout << "Slot type: " << tab[row_trans][col_cords]->slot_type << endl;
-            }
-            if(tab[row_trans][col_cords]->base_damage != 0)
-            {
-                cout << "Base damage: " << tab[row_trans][col_cords]->base_damage << endl;
-            }
-            if(tab[row_trans][col_cords]->base_defence != 0)
-            {
-                cout << "Base defence: " << tab[row_trans][col_cords]->base_defence << endl;
-            }
-            if(tab[row_trans][col_cords]->quality != "normal")
-            {
-                cout << "Quality: " << tab[row_trans][col_cords]->quality << endl;
-            }
-            cout << "Durability: " << tab[row_trans][col_cords]->durability << endl;
-
-            if(has_traits_tab(row_trans, col_cords))
-            {
-                cout << "Traits:" << endl;
-                int adder = 1;
-                for(int i = 0; i < 4; i++)
+                cout << "Item type: " << tab[row_trans][col_cords]->item_type << endl;
+                if(tab[row_trans][col_cords]->slot_type != "NAN")
                 {
-                    if(tab[row_trans][col_cords]->traits[i] != "NAN")
+                    cout << "Slot type: " << tab[row_trans][col_cords]->slot_type << endl;
+                }
+                if(tab[row_trans][col_cords]->base_damage != 0)
+                {
+                    cout << "Base damage: " << tab[row_trans][col_cords]->base_damage << endl;
+                }
+                if(tab[row_trans][col_cords]->base_defence != 0)
+                {
+                    cout << "Base defence: " << tab[row_trans][col_cords]->base_defence << endl;
+                }
+                if(tab[row_trans][col_cords]->quality != "normal")
+                {
+                    cout << "Quality: " << tab[row_trans][col_cords]->quality << endl;
+                }
+                cout << "Durability: " << tab[row_trans][col_cords]->durability << endl;
+
+                if(has_traits_tab(row_trans, col_cords))
+                {
+                    cout << "Traits:" << endl;
+                    int adder = 1;
+                    for(int i = 0; i < 4; i++)
                     {
-                        cout << adder << " trait: " << tab[row_trans][col_cords]->traits[i] << endl;
-                        adder++;
+                        if(tab[row_trans][col_cords]->traits[i] != "NAN")
+                        {
+                            cout << adder << " trait: " << tab[row_trans][col_cords]->traits[i] << endl;
+                            adder++;
+                        }
                     }
                 }
-            }
             }
         }
 
 
 
+    }
+
+    void force_swap()
+    {
+        auto temp = tab[0][4];
+        tab[0][4] = battle_slots[4];
+        battle_slots[4] = temp;
     }
 };
 
@@ -666,6 +774,14 @@ int main()
 
     something.add_random_item();
     something.add_random_item();
+
+    something.add_specific_item(0,"something", "F", "sword", "weapon");
+    something.display_name();
+
+    something.swap_item('A', 4, 'X', 5); //its crashing when im trying to execute this command
+
+    //something.force_swap();
+
     something.display_name();
     something.show_stats('A', 3);
 
