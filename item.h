@@ -61,4 +61,14 @@ public:
         : Gear(id, amount, name, display_name, item_type, slot_type, durability, gear_type, quality), base_defence(base_defence) {}
 };
 
+class Shield : public Gear
+{
+public:
+    int base_defence;
+    
+    Shield(int id = 0, int amount = 1, string name = "Roman shield", string display_name = "S", string item_type = "Shield", string slot_type = "Shield",
+          int durability = 80, string gear_type = "shield", string quality = "slightly used", int base_defence = 1)
+        : Gear(id, amount, name, display_name, item_type, slot_type, durability, gear_type, quality), base_defence(base_defence) {}
+};
+
 #endif // ITEM_H
