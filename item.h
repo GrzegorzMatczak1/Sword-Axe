@@ -10,7 +10,7 @@ class Item
 public:
     int id;
     int amount;
-    const int max_amount = 50; // 30? 50? or what?
+    const int max_amount = 64;
     string name;
     string display_name;
     string item_type;
