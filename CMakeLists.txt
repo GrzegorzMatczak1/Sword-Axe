@@ -1,14 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(OMGTITLED LANGUAGES CXX)
+project(profegional LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(OMGTITLED main.cpp)
+add_executable(profegional main.cpp
+    item.h
+    item_source.cpp)
 
 include(GNUInstallDirs)
-install(TARGETS OMGTITLED
+install(TARGETS profegional
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

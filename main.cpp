@@ -158,7 +158,7 @@ public:
 
     void add_item_test(int row_cords, int col_cords) //This code adds temprorary items to the inventory
     {
-        tab[row_cords - 1][col_cords - 1] = new Item(11, "!");
+        tab[row_cords - 1][col_cords - 1] = new Item(11, "babab");
     }
 
     int translate_rows(char letter) //This code is used to translade A B inputs to letters
@@ -184,7 +184,7 @@ public:
         int col_cords1_smol = col_cords1 - 1;
         int col_cords2_smol = col_cords2 - 1;
 
-        unique_ptr<int[]> free_spot(new int[2]);
+        int* free_spot = find_smallest_free_spot();
 
 
         string* slot_type_list = new string[7];
@@ -775,10 +775,15 @@ int main()
     something.add_random_item();
     something.add_random_item();
 
-    something.add_specific_item(0,"something", "F", "sword", "weapon");
+    something.add_specific_item(0,"something", "U", "shield", "shield");
+    something.add_specific_item(0,"something", "F", "axe", "weapon");
     something.display_name();
 
-    something.swap_item('A', 4, 'X', 5); //its crashing when im trying to execute this command
+    something.swap_item('A', 4, 'X', 6); //its crashing when im trying to execute this command (fixed)
+    something.display_name();
+    something.swap_item('a', 5, 'x', 5);
+    something.display_name();
+    something.swap_item('a', 4, 'x', 6);
 
     //something.force_swap();
 
