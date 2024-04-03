@@ -68,6 +68,13 @@ public:
         }
     }
 
+    void get_col()
+    {
+        for (const auto& pair : this->col_indexes) {
+            cout << "Key: " << pair.first << ", Value: " << pair.second << endl;
+        }
+    }
+
     void display()
     {
         cout << " ==============================" << endl;
@@ -150,26 +157,6 @@ public:
             return -2; // I know it's kinda stupid but I couldn't otherwise because return values are indexes
         };
 
-        auto process_cords1_col = [this](string cords1) -> int
-        {
-            string number = cords1.substr(1, cords1.size() - 1); // this gets a string value from passed cords and turns a part from index 1 to the end of the string (number part)
-            int num;
-            try{
-                num = stoi(number);
-                for (const auto& pair : this->col_indexes) {
-                    if (pair.first == number)
-                    {
-                        return pair.second;
-                    }
-                }
-            } catch (const invalid_argument& e)
-            {
-                return -1;
-            }
-            return -1;
-        };
-
-
         auto process_cords2_row = [this](string cords2) -> int
         {
             char letter = char(cords2[0]);
@@ -189,36 +176,21 @@ public:
             return -2;
         };
 
-        auto process_cords2_col = [this](string cords2) -> int
-        {
-            string number = cords2.substr(1, cords2.size() - 1);
-            int num;
-            try{
-                num = stoi(number);
-                for (const auto& pair : this->col_indexes) {
-                    if (pair.first == number)
-                    {
-                        return pair.second;
-                    }
-                }
-            } catch (const invalid_argument& e)
-            {
-                return -1;
-            }
-            return -1;
-        };
-
         // indexes -  do not corelate with numbers in console display // this part should be working(i hope)
         int cords1_row = process_cords1_row(cords1); // from letter to index number
-        int cords1_col = process_cords1_col(cords1); // from number to index number
+        int cords1_col = (cords1[1] - '0') - 1; // from number to index number
 
         int cords2_row = process_cords2_row(cords2); // same
-        int cords2_col = process_cords2_col(cords2); // same
+        int cords2_col = (cords2[1] - '0') - 1; // same
 
         auto errorMessage = []() -> void
         {
             cout << "Wrong input or items." << endl;
         };
+
+        cout << "B4: " << cords1_row << " " << cords1_col << endl;
+        cout << "D1: " << cords2_row << " " << cords2_col << endl;
+
 
         // if first input if in gear and second in main inventory
         //if character is #, col not out of range; row not out of range, col not out of range
@@ -324,6 +296,7 @@ public:
         {
             errorMessage();
         }
+
     } // I think it doesn't work. it's 00:17 Tuesday 😭😭😭😭😭😭😭
 
 
@@ -350,21 +323,23 @@ public:
         }
         delete[] battle_slots;
     }
-// add random will be done differently. how about we make classes
-//with specific items like wood, roman shield, knife. this way we have a created set of existing items.
-//the classes could have methods like generate random or random stats and so on
-// class items, helmets, leggins etc
+    // add random will be done differently. how about we make classes
+    //with specific items like wood, roman shield, knife. this way we have a created set of existing items.
+    //the classes could have methods like generate random or random stats and so on
+    // class items, helmets, leggins etc
 };
 
 int main()
 {
 
     Inventory I;
-    I.display();
+    //I.display();
     I.add_item_test(2, 4, Item(0, "", "1"));
     I.add_item_test(4, 1, Item(0, "", "2"));
-    I.display();
+    //I.display();
     I.swap_items("B4", "D1");
-    I.display();
+
+
+    //I.display();
     return 0;
 }
