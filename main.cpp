@@ -20,7 +20,7 @@ public:
     int cols;
     string letters;
     map<char, int> row_indexes;
-    map<string, int> col_indexes;
+    map<string, int> gear_slots;
 
     Inventory(int rows = 4, int cols = 9) : rows{rows}, cols{cols} //Inventory Constructor
     {
@@ -34,17 +34,19 @@ public:
         {
             for(int j = 0; j < cols; j++)
             {
-                tab[i][j] = new Item();
+                tab[i][j] = nullptr;
             }
         }
+
         battle_slots = new Gear*[6];
-        battle_slots[0] = new Helmet(); // helmet slot
-        battle_slots[1] = new Chestplate(); // chestplate
-        battle_slots[2] = new Leggins(); // leggins
-        battle_slots[3] = new Boots(); // boots
-        battle_slots[4] = new Weapon(); // weapons like sword, trident or whatever
-        battle_slots[5] = new Shield(); // shield, obviously
+        battle_slots[0] = nullptr; // helmet slot
+        battle_slots[1] = nullptr; // chestplate
+        battle_slots[2] = nullptr; // leggins
+        battle_slots[3] = nullptr; // boots
+        battle_slots[4] = nullptr; // weapons like sword, trident or whatever
+        battle_slots[5] = nullptr; // shield
         fill_row_indexes();
+        fill_gear_slots();
     }
 
     // this one creates a map (dictionary) of letters and their matching indexes
@@ -59,21 +61,28 @@ public:
         }
     }
 
-    // same but with column numbers. had to be done
-    void fill_col_indexes()
+    void fill_gear_slots()
     {
-        for (int i = 0; i < cols; i++)
-        {
-            col_indexes[to_string(i + 1)] = i;
-        }
+        gear_slots["helmet"] = 0;
+        gear_slots["chestplate"] = 0;
+        gear_slots["leggins"] = 0;
+        gear_slots["boots"] = 0;
+        gear_slots["weapon"] = 0;
+        gear_slots["shield"] = 0;
     }
 
-    void get_col()
+
+    bool compare_item_slot_type_with_slot(string item_slot_type)
     {
-        for (const auto& pair : this->col_indexes) {
-            cout << "Key: " << pair.first << ", Value: " << pair.second << endl;
+        for (const auto& pair : this->gear_slots) {
+            if (item_slot_type == pair.first)
+            {
+                return true;
+            }
         }
+        return false;
     }
+
 
     void display()
     {
@@ -91,7 +100,7 @@ public:
             cout << letters[i];
             for(int j = 0; j < cols; j++)
             {
-                if(tab[i][j]->name == "none")
+                if(tab[i][j] == nullptr)
                 {
                     cout << "[ ]";
                 }
@@ -105,7 +114,7 @@ public:
         cout << "#";
         for(int i = 0; i < 6; i++)
         {
-            if(battle_slots[i]->name == "none")
+            if(battle_slots[i] == nullptr)
             {
                 cout << "{ }";
             }
@@ -117,30 +126,31 @@ public:
         cout << endl;
     }
 
+
     void add_item_test(int row_cords, int col_cords, const Item& itemToAdd) //This code adds temprorary items to the inventory
     {
         tab[row_cords - 1][col_cords - 1] = new Item(itemToAdd);
     }
 
-    void add_gear_test(int row_cords, int col_cords, const Gear& gearToAdd, string where)
+
+    void add_gear_to_main(int row_cords, int col_cords, const Item& gearToAdd)
     {
-        if(where == "main")
-        {
-            tab[row_cords - 1][col_cords - 1] = new Gear(gearToAdd);
-        }
-        else if(where == "gear")
-        {
-            battle_slots[row_cords - 1] = new Gear(gearToAdd);
-        }
+        tab[row_cords - 1][col_cords - 1] = new Item(gearToAdd);
     }
 
-    // this better have no bugs 😭🙏
-    void swap_items(string cords1, string cords2) // this shi was such a pain in the ass to re-impleent
-    {
 
-        auto process_cords1_row = [this](string cords1) -> int
+    void add_gear_to_gear(int col_cords, const Gear& gearToAdd)
+    {
+        battle_slots[col_cords - 1] = new Gear(gearToAdd);
+    }
+
+
+    // returns processed cord
+    auto get_processed_cords(string cords) -> vector<int>
+    {
+        auto process_cords_row = [this](string cords) -> int
         {
-            char letter = char(cords1[0]);
+            char letter = char(cords[0]);
 
             if((int(letter) >= 65) && (int(letter) <= 90)) // from capital A-Z
             {
@@ -154,150 +164,165 @@ public:
             {
                 return -1;
             }
-            return -2; // I know it's kinda stupid but I couldn't otherwise because return values are indexes
-        };
-
-        auto process_cords2_row = [this](string cords2) -> int
-        {
-            char letter = char(cords2[0]);
-
-            if((int(letter) >= 65) && (int(letter) <= 90))
-            {
-                for (const auto& pair : this->row_indexes) {
-                    if (pair.first == letter)
-                    {
-                        return pair.second;
-                    }
-                }
-            } else if(int(letter) == 35)
-            {
-                return -1;
-            }
             return -2;
         };
 
-        // indexes -  do not corelate with numbers in console display // this part should be working(i hope)
-        int cords1_row = process_cords1_row(cords1); // from letter to index number
-        int cords1_col = (cords1[1] - '0') - 1; // from number to index number
+        int cords_row = process_cords_row(cords);
+        int cords_col = (cords[1] - '0') - 1;
 
-        int cords2_row = process_cords2_row(cords2); // same
-        int cords2_col = (cords2[1] - '0') - 1; // same
+        return {cords_row, cords_col};
+    }
 
-        auto errorMessage = []() -> void
+
+    int is_valid_cords_input(string cords)
+    {
+
+        int cords_row = get_processed_cords(cords)[0];
+        int cords_col = get_processed_cords(cords)[1];
+
+        // in main
+        if ((cords_row >= 0 && cords_row < this->rows) && (cords_col >= 0 && cords_col < this->cols))
         {
-            cout << "Wrong input or items." << endl;
-        };
-
-        cout << "B4: " << cords1_row << " " << cords1_col << endl;
-        cout << "D1: " << cords2_row << " " << cords2_col << endl;
-
-
-        // if first input if in gear and second in main inventory
-        //if character is #, col not out of range; row not out of range, col not out of range
-        if( ((cords1_row == -1) && ((cords1_col >= 0) && (cords1_col <= 5)))  &&  ( ((cords2_row >= 0) && (cords2_row < this->rows)) && ((cords2_col >= 0) && (cords2_col < this->cols)) ) )
+            return 1;
+        }
+        // in gear
+        else if((cords_row == -1) && (cords_col >= 0 && cords_col <= 5))
         {
-            Gear* temp = battle_slots[cords1_col]; // from gear slots
-            Item* temp2 = tab[cords2_row][cords2_col]; // from main inventory
+            return 0;
+        }
+        // out of range/complete nonsense
+        else
+        {
+            return -1;
+        }
+    }
 
-            //both slots are NOT empty
-            if (!(temp2->name == "none") && !(temp->name == "none"))
+
+    void swap_items(string cords1, string cords2)
+    {
+        if (is_valid_cords_input(cords1) >= 0 || is_valid_cords_input(cords2) >= 0)
+        {
+            // indexes -  do not corelate with numbers in console display // prc = processed (integers)
+            vector<int> cords1_prc =
+
+            int cords2_row = process_cords2_row(cords2); // same
+            int cords2_col = (cords2[1] - '0') - 1; // same
+
+            auto errorMessage = []() -> void
             {
-                if (temp2->slot_type == temp->slot_type) // both are same gear
+                cout << "Wrong input or items." << endl;
+            };
+
+            cout << "B4: " << cords1_row << " " << cords1_col << endl;
+            cout << "D1: " << cords2_row << " " << cords2_col << endl;
+
+
+            // if first input if in gear and second in main inventory
+            //if character is #, col not out of range; row not out of range, col not out of range
+            if( ((cords1_row == -1) && ((cords1_col >= 0) && (cords1_col <= 5)))  &&  ( ((cords2_row >= 0) && (cords2_row < this->rows)) && ((cords2_col >= 0) && (cords2_col < this->cols)) ) )
+            {
+                Gear* temp = battle_slots[cords1_col]; // from gear slots
+                Item* temp2 = tab[cords2_row][cords2_col]; // from main inventory
+
+                //both slots are NOT empty
+                if (!(temp2->name == "none") && !(temp->name == "none"))
                 {
-                    Gear* toGear = dynamic_cast<Gear*>(temp2); // this turns an Item pointer into a Gear pointer. and I know that the pointer is a Gear because of if, which checks its slot type. hope it's clear
-                    Item* toItem = dynamic_cast<Gear*>(temp);
+                    if (temp2->slot_type == temp->slot_type) // both are same gear
+                    {
+                        Gear* toGear = dynamic_cast<Gear*>(temp2); // this turns an Item pointer into a Gear pointer. and I know that the pointer is a Gear because of if, which checks its slot type. hope it's clear
+                        Item* toItem = dynamic_cast<Gear*>(temp);
+
+                        tab[cords2_row][cords2_col] = toItem;
+                        battle_slots[cords1_col] = toGear;
+                    } else
+                    {
+                        errorMessage();
+                    }
+                }
+
+                // only first, general inventory slot is empty
+                else if((temp2->name == "none") && !(temp->name == "none"))
+                {
+                    Item* toItem = dynamic_cast<Item*>(temp);
 
                     tab[cords2_row][cords2_col] = toItem;
-                    battle_slots[cords1_col] = toGear;
-                } else
+                    battle_slots[cords1_col] = new Gear();
+                }
+
+                // only second, gear slot is empty
+                else if(!(temp2->name == "none") && (temp->name == "none"))
                 {
-                    errorMessage();
+                    if (temp2->slot_type == temp->slot_type)
+                    {
+                        Gear* toGear = dynamic_cast<Gear*>(temp2);
+
+                        tab[cords2_row][cords2_col] = new Item();
+                        battle_slots[cords1_col] = toGear;
+                    } else
+                    {
+                        errorMessage();
+                    }
                 }
             }
 
-            // only first, general inventory slot is empty
-            else if((temp2->name == "none") && !(temp->name == "none"))
+            // if first input if in general and second in gear
+            else if( (((cords1_row >= 0) && (cords1_row < this->rows)) && ((cords1_col >= 0) && (cords1_col < this->cols)))  &&  ((cords2_row == -1) && ((cords2_col >= 0) && (cords2_col <= 5))) )
             {
-                Item* toItem = dynamic_cast<Item*>(temp);
+                Item* temp = tab[cords1_row][cords1_col];
+                Gear* temp2 = battle_slots[cords2_col];
 
-                tab[cords2_row][cords2_col] = toItem;
-                battle_slots[cords1_col] = new Gear();
-            }
-
-            // only second, gear slot is empty
-            else if(!(temp2->name == "none") && (temp->name == "none"))
-            {
-                if (temp2->slot_type == temp->slot_type)
+                if (!(temp2->name == "none") && !(temp->name == "none"))
                 {
-                    Gear* toGear = dynamic_cast<Gear*>(temp2);
+                    if (temp2->slot_type == temp->slot_type)
+                    {
+                        Gear* toGear = dynamic_cast<Gear*>(temp);
+                        Item* toItem = dynamic_cast<Item*>(temp2);
 
-                    tab[cords2_row][cords2_col] = new Item();
-                    battle_slots[cords1_col] = toGear;
-                } else
-                {
-                    errorMessage();
+                        tab[cords1_row][cords1_col] = toItem;
+                        battle_slots[cords2_col] = toGear;
+                    } else
+                    {
+                        errorMessage();
+                    }
                 }
-            }
-        }
 
-        // if first input if in general and second in gear
-        else if( (((cords1_row >= 0) && (cords1_row < this->rows)) && ((cords1_col >= 0) && (cords1_col < this->cols)))  &&  ((cords2_row == -1) && ((cords2_col >= 0) && (cords2_col <= 5))) )
-        {
-            Item* temp = tab[cords1_row][cords1_col];
-            Gear* temp2 = battle_slots[cords2_col];
-
-            if (!(temp2->name == "none") && !(temp->name == "none"))
-            {
-                if (temp2->slot_type == temp->slot_type)
+                else if((temp2->name == "none") && !(temp->name == "none"))
                 {
-                    Gear* toGear = dynamic_cast<Gear*>(temp);
                     Item* toItem = dynamic_cast<Item*>(temp2);
 
                     tab[cords1_row][cords1_col] = toItem;
-                    battle_slots[cords2_col] = toGear;
-                } else
+                    battle_slots[cords2_col] = new Gear();
+                }
+
+                else if(!(temp2->name == "none") && (temp->name == "none"))
                 {
-                    errorMessage();
+                    if (temp2->slot_type == temp->slot_type)
+                    {
+                        Gear* toGear = dynamic_cast<Gear*>(temp);
+
+                        tab[cords1_row][cords1_col] = new Item();
+                        battle_slots[cords2_col] = toGear;
+                    } else
+                    {
+                        errorMessage();
+                    }
                 }
             }
 
-            else if((temp2->name == "none") && !(temp->name == "none"))
+            // 1 - B4 ; 2 - D1
+            // if both inputs are in general
+            else if ( (((cords1_row >= 0) && (cords1_row < this->rows)) && ((cords1_col >= 0) && (cords1_col < this->cols)))  &&  (((cords2_row >= 0) && (cords2_row < this->rows)) && ((cords2_col >= 0) && (cords2_col < this->cols))) )
             {
-                Item* toItem = dynamic_cast<Item*>(temp2);
-
-                tab[cords1_row][cords1_col] = toItem;
-                battle_slots[cords2_col] = new Gear();
+                swap(tab[cords1_row][cords1_col], tab[cords2_row][cords2_col]);
             }
 
-            else if(!(temp2->name == "none") && (temp->name == "none"))
+            // any other issue idk
+            else
             {
-                if (temp2->slot_type == temp->slot_type)
-                {
-                    Gear* toGear = dynamic_cast<Gear*>(temp);
-
-                    tab[cords1_row][cords1_col] = new Item();
-                    battle_slots[cords2_col] = toGear;
-                } else
-                {
-                    errorMessage();
-                }
+                errorMessage();
             }
         }
-
-        // 1 - B4 ; 2 - D1
-        // if both inputs are in general
-        else if ( (((cords1_row >= 0) && (cords1_row < this->rows)) && ((cords1_col >= 0) && (cords1_col < this->cols)))  &&  (((cords2_row >= 0) && (cords2_row < this->rows)) && ((cords2_col >= 0) && (cords2_col < this->cols))) )
-        {
-            swap(tab[cords1_row][cords1_col], tab[cords2_row][cords2_col]);
-        }
-
-        // any other issue idk
-        else
-        {
-            errorMessage();
-        }
-
-    } // I think it doesn't work. it's 00:17 Tuesday 😭😭😭😭😭😭😭
+    }
 
 
 
@@ -336,10 +361,12 @@ int main()
     //I.display();
     I.add_item_test(2, 4, Item(0, "", "1"));
     I.add_item_test(4, 1, Item(0, "", "2"));
-    //I.display();
+    //I.add_gear_to_main(0, 0, Boots(0, "", "B"));
+    //I.add_gear_to_gear(1, Helmet(0, "", "H"));
+    I.display();
     I.swap_items("B4", "D1");
 
 
-    //I.display();
+    I.display();
     return 0;
 }
