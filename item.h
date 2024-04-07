@@ -40,7 +40,7 @@ public:
     int actual_damage;
     float crit_chance;
 
-    Weapon(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Weapon(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "weapon",
            int durability = 0, string quality = "", int base_damage = 0, float crit_chance = 0.0)
         : Gear(amount, name, display_name, item_type, slot_type, durability, quality),
         base_damage(base_damage), crit_chance(crit_chance) {}
@@ -65,8 +65,7 @@ public:
 class Helmet : public Armor
 {
 public:
-    string slot_type = "helmet";
-    Helmet(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Helmet(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "helmet",
            int durability = 0, string quality = "", int base_defence = 0)
         : Armor(amount, name, display_name, item_type, slot_type, durability, quality, base_defence) {}
 };
@@ -74,8 +73,7 @@ public:
 class Chestplate : public Armor
 {
 public:
-    string slot_type = "chestplate";
-    Chestplate(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Chestplate(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "chestplate",
            int durability = 0, string quality = "", int base_defence = 0)
         : Armor(amount, name, display_name, item_type, slot_type, durability, quality, base_defence) {}
 };
@@ -83,8 +81,7 @@ public:
 class Leggins : public Armor
 {
 public:
-    string slot_type = "leggins";
-    Leggins(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Leggins(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "leggins",
                int durability = 0, string quality = "", int base_defence = 0)
         : Armor(amount, name, display_name, item_type, slot_type, durability, quality, base_defence) {}
 };
@@ -92,8 +89,7 @@ public:
 class Boots : public Armor
 {
 public:
-    string slot_type = "boots";
-    Boots(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Boots(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "boots",
                int durability = 0, string quality = "", int base_defence = 0)
         : Armor(amount, name, display_name, item_type, slot_type, durability, quality, base_defence) {}
 };
@@ -104,7 +100,7 @@ public:
     int base_defence;
     int actual_defence;
 
-    Shield(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "",
+    Shield(int amount = 0, string name = "none", string display_name = "", string item_type = "", string slot_type = "shield",
            int durability = 0, string quality = "", int base_defence = 0)
         : Gear(amount, name, display_name, item_type, slot_type, durability, quality), base_defence(base_defence) {}
 
