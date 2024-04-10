@@ -8,6 +8,7 @@ Inventory::Inventory(int rows, int cols) : rows{rows}, cols{cols}
 {
     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     tab = new Item**[rows];
+    gold = 0;
     for(int i = 0; i < rows; i++)
     {
         tab[i] = new Item*[cols];
@@ -62,7 +63,6 @@ void Inventory::display()
     }
     cout << endl << setw(3);
 
-
     for (int i = 0; i < rows; i++)
     {
         cout << letters[i];
@@ -92,6 +92,7 @@ void Inventory::display()
         }
     }
     cout << endl;
+    cout << "  Gold: " << gold << endl;
 }
 
 int Inventory::get_gear_slot_index(string item_slot_type)
@@ -308,6 +309,10 @@ void Inventory::swap_items(string cords1, string cords2)
                 cout << "Both slots are empty!" << endl;
             }
         }
+        else if(cords1_prc[0] == -1 && cords2_prc[0] == -1)
+        {
+            cout << "Cant swap items in gear slots!" << endl;
+        }
     } else
     {
         cout << "Your input is invalid!" << endl;
@@ -335,6 +340,30 @@ void Inventory::getInfo(string cords)
     } else
     {
         cout << "Your input is invalid!" << endl;
+    }
+}
+
+void Inventory::add_gold(int ammount)
+{
+    if(gold >= 100000)
+    {
+        cout << "Cant add more gold!" << endl;
+    }
+    else if((gold + ammount) > 100000)
+    {
+        gold = 100000;
+    }
+    else if(ammount < 0)
+    {
+        cout << "Error negative ammount value! Cant add gold!" << endl;
+    }
+    else if(gold < 0)
+    {
+        gold = 0;
+    }
+    else
+    {
+        gold += ammount;
     }
 }
 

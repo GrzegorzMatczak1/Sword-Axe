@@ -9,9 +9,56 @@
 
 using namespace std;
 
+class Game
+{
+
+
+public:
+    Inventory* I;
+    bool isRunning;
+    bool tutorial;
+    map<int, string> operationOptions;
+    Game()
+    {
+        isRunning = true;
+        I = new Inventory();
+
+        operationOptions[0] = "defaulut";
+        operationOptions[0] = "inspect";
+        operationOptions[0] = "swap";
+    }
+    void chagne_tutorial_state(bool changer)
+    {
+        if(changer != tutorial)
+        {
+            tutorial = changer;
+        }
+    }
+    void run()
+    {
+        do{
+
+        }while (isRunning);
+    }
+    void Game_display()
+    {
+        string user_input;
+
+        cout << "[INVENTORY]  [SHOP]  [BLACKSMITH]  [EXPEDITION]" << endl;
+
+        cout << "choose one option ";
+        cin >> user_input;
+
+        if(user_input[0] == 'i' || user_input[0] == 'I')
+        {
+
+        }
+    }
+};
+
 int main()
 {
-    
+
     Inventory I;
 
     I.add_item(2, 4, Item(0, "", "1"));
@@ -23,9 +70,11 @@ int main()
 
     I.display();
 
-    //I.swap_items();
+    I.swap_items("A6", "#5");
 
+    I.add_gold(777);
 
     I.display();
+
     return 0;
 }

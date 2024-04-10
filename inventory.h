@@ -13,6 +13,7 @@ public:
     Item** battle_slots;
     int rows;
     int cols;
+    int gold;
     string letters;
     map<char, int> row_indexes;
     map<string, int> gear_slots;
@@ -56,6 +57,8 @@ public:
 
 
     void getInfo(string cords);
+
+    void add_gold(int ammount);
 
 
     ~Inventory();
