@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(meybe_titeeled LANGUAGES CXX)
+project(untitled3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(meybe_titeeled main.cpp
-    item.h
+add_executable(untitled3 main.cpp
     inventory.h
     inventory_source.cpp
-    item_source.cpp)
+    item.h
+    item_source.cpp
+    expedition_source.cpp
+    expedition.h)
 
 include(GNUInstallDirs)
-install(TARGETS meybe_titeeled
+install(TARGETS untitled3
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <iomanip>
 #include "inventory.h"
@@ -93,6 +94,7 @@ void Inventory::display()
     }
     cout << endl;
     cout << "  Gold: " << gold << endl;
+    cout << " ==============================" << endl;
 }
 
 int Inventory::get_gear_slot_index(string item_slot_type)
@@ -367,6 +369,40 @@ void Inventory::add_gold(int ammount)
     }
 }
 
+vector<int> Inventory::find_free_spot()
+{
+    vector<int> cords;
+    for(int i = 0; i < rows; i++)
+    {
+        for(int j = 0; j < cols; j++)
+        {
+            if(tab[i][j] == nullptr)
+            {
+                cords[0] = i;
+                cords[1] = j;
+                return cords;
+            }
+        }
+    }
+    cords[0] = -1;
+    cords[1] = -1;
+    return cords;
+
+}
+void Inventory::add_item_new(const Item& itemToAdd)
+{
+    vector<int> cords = find_free_spot();
+    if(cords[0] == -1)
+    {
+        string passer;
+        cout << "Inventory is full!" << endl;
+        cin >> passer;
+    }
+    else
+    {
+        add_item(cords[0], cords[1], itemToAdd);
+    }
+}
 Inventory::~Inventory()
 {
     for(int i = 0; i < rows; i++)

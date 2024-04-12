@@ -60,6 +60,10 @@ public:
 
     void add_gold(int ammount);
 
+    vector<int> find_free_spot();
+
+    void add_item_new(const Item& itemToAdd);
+
 
     ~Inventory();
 };

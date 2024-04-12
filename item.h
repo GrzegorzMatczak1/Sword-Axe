@@ -16,11 +16,13 @@ public:
     string slot_type;
     string rarity;
 
-    Item(int amount = 0, string name = "", string display_name = "", string item_type = "", string slot_type = "", string rarity = "common");
+
+    Item(int amount = 0, string name = "", string display_name = "", string item_type = "", string slot_type = "", string rarity = "common")
+        : amount{amount}, name{name}, display_name{display_name}, item_type{item_type}, slot_type{slot_type}, rarity{rarity} {}
 
     virtual void get_data() const;
-};
 
+};
 
 class Gear : public Item
 {
@@ -29,9 +31,9 @@ public:
     string quality;
 
     Gear(int amount = 0, string name = "", string display_name = "", string item_type = "", string slot_type = "",
-         int durability = 0, string quality = "");
+         int durability = 0, string quality = "")
+        : Item(amount, name, display_name, item_type, slot_type) {}
 };
-
 
 class Weapon : public Gear
 {
@@ -46,6 +48,7 @@ public:
         base_damage(base_damage), crit_chance(crit_chance) {}
 
     void get_data() const override;
+
 };
 
 class Armor : public Gear
