@@ -9,22 +9,43 @@
 
 using namespace std;
 
+class Items
+{
+public:
+    vector<Item> item_list;
+
+    Items()
+    {
+        item_list = {
+            Item(1, "Wood", "W", "Resourse", "General", "Common"),
+            Item(1, "Stone", "S", "Resourse", "General", "Common"),
+            Item(1, "Metal", "M", "Resourse", "General", "Uncommon"),
+            Item(1, "Rope", "R", "Resourse", "General", "Uncommon"),
+            Item(1, "Stick", "S", "Resourse", "General", "Common")
+        };
+    }
+};
+
 int main()
 {
     
     Inventory I;
+    Items It;
 
-    I.add_item(2, 4, Item(0, "", "1"));
-    I.add_item(4, 1, Item(0, "", "2"));
-    I.add_item(3, 8, Item(0, "", "3"));
-    I.add_item(1, 4, Item(0, "", "4"));
-    I.add_gear_to_main(1, 1, Boots(0, "", "B"));
-    I.add_gear_to_main(1, 6, Weapon(0, "", "W"));
+    I.add_item(2, 4, It.item_list[0]);
+    I.add_item(4, 1, It.item_list[2]);
+    I.add_item(3, 8, It.item_list[1]);
+    I.add_item(1, 4, It.item_list[3]);
 
     I.display();
 
-    //I.swap_items();
+    cout << endl;
 
+    I.getInfo("C8");
+
+    cout << endl;
+
+    //I.swap_items("D1", "C8");
 
     I.display();
     return 0;
