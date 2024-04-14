@@ -313,11 +313,67 @@ void Inventory::swap_items(string cords1, string cords2)
     }
 }
 
+
 void Inventory::getInfo(string cords)
 {
     if (is_valid_cords_input(cords) >= 0)
     {
         vector<int> cords_prc = get_processed_cords(cords);
+
+        Item* item;
+
+        if (cords_prc[0] >= 0)
+        {
+            item = tab[cords_prc[0]][cords_prc[1]];
+        }
+        else if (cords_prc[0] == -1)
+        {
+            item = battle_slots[cords_prc[0]];
+        }
+
+        if (item->slot_type != "general")
+        {
+            Weapon* w = getObjectFromPointer<Weapon>(item);
+            Shield* s = getObjectFromPointer<Shield>(item);
+            Helmet* h = getObjectFromPointer<Helmet>(item);
+            Chestplate* c = getObjectFromPointer<Chestplate>(item);
+            Leggins* l = getObjectFromPointer<Leggins>(item);
+            Boots* b = getObjectFromPointer<Boots>(item);
+
+            if (w)
+            {
+                w->get_data();
+            }
+            else if (s)
+            {
+                s->get_data();
+            }
+            else if (h)
+            {
+                h->get_data();
+            }
+            else if (c)
+            {
+                c->get_data();
+            }
+            else if (l)
+            {
+                l->get_data();
+            }
+            else if (b)
+            {
+                b->get_data();
+            }
+            else
+            {
+                cout << "An error!" << endl;
+            }
+        }
+        else
+        {
+            item->get_data();
+        }
+
 
         // in main
         if (cords_prc[0] >= 0)
@@ -335,6 +391,12 @@ void Inventory::getInfo(string cords)
     {
         cout << "Your input is invalid!" << endl;
     }
+}
+
+template<typename T>
+T* Inventory::getObjectFromPointer(Item* pointer)
+{
+    return dynamic_cast<T*>(pointer);
 }
 
 Inventory::~Inventory()
