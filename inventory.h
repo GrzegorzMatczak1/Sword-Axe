@@ -58,6 +58,10 @@ public:
     void getInfo(string cords);
 
 
+    template<typename T>
+    T* getObjectFromPointer(Item* pointer);
+
+
     ~Inventory();
 };
 
