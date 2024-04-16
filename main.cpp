@@ -1,441 +1,234 @@
 #include <iostream>
+#include <cstdlib>
 #include <time.h>
+#include <map>
 #include <vector>
 #include <string>
-#include <cctype>
-#include <cstdlib>
-#include <stdlib.h>
-#include <memory>
-#include <iomanip>
-#include <map>
 #include "item.h"
+#include "inventory.h"
+#include<windows.h>
 
 using namespace std;
 
-class Inventory //Inventory Class
+class Expedition
 {
 public:
-    Item*** tab;
-    Item** battle_slots;
-    int rows;
-    int cols;
-    string letters;
-    map<char, int> row_indexes;
-    map<string, int> gear_slots;
+    int enemy_hp;
+    int enemy_damage;
+    int enemy_defence;
+    string enemy_name;
 
-    Inventory(int rows = 4, int cols = 9) : rows{rows}, cols{cols} //Inventory Constructor
+    Item** player_gear;
+    int player_hp;
+    int player_dmg;
+    int player_defence;
+
+
+    Expedition()
     {
-        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        tab = new Item**[rows];
-        for(int i = 0; i < rows; i++)
+        player_hp = 100; //adding basic values for player only hp will be permament
+        player_dmg = 1;
+
+        player_defence = 1;
+
+        enemy_defence = 2; //adding basic damage to enemy. Later it will be randomly chosen from a list with some atributes given in between
+        enemy_name = "Halpis";
+        enemy_damage = 2;
+        enemy_hp = 6;
+
+        player_gear = new Item*[6];
+        player_gear[0] = nullptr;
+        player_gear[1] = nullptr;
+        player_gear[2] = nullptr;
+        player_gear[3] = nullptr;
+        player_gear[4] = nullptr;
+        player_gear[5] = nullptr;
+    }
+
+    void fill_gear(Inventory* inventory)
+    {
+        player_gear[0] = inventory->battle_slots[0];
+        player_gear[1] = inventory->battle_slots[1];
+        player_gear[2] = inventory->battle_slots[2];
+        player_gear[3] = inventory->battle_slots[3];
+        player_gear[4] = inventory->battle_slots[4];
+        player_gear[5] = inventory->battle_slots[5];
+    }
+
+    void expedition_loop()
+    {
+        bool game_end = false;
+
+
+        while(!game_end)
         {
-            tab[i] = new Item*[cols];
-        }
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
+            string message;
+            string option_attack;
+
+            cout << "1. Attack" << endl;
+            cout << "2. Defend" << endl;
+            cin >> option_attack;
+
+
+            int enemy_attack = time(0) % 2; //enemy attack = 0 is for enemy attack and e... = 1 is for defence :)
+
+            if(option_attack[0] == 'A' || option_attack[0] == 'a') //place holder just for now. later it will be replaced for wsad movement
             {
-                tab[i][j] = nullptr;
-            }
-        }
 
-        battle_slots = new Item*[6];
-        battle_slots[0] = nullptr;
-        battle_slots[1] = nullptr;
-        battle_slots[2] = nullptr;
-        battle_slots[3] = nullptr;
-        battle_slots[4] = nullptr;
-        battle_slots[5] = nullptr;
-
-        fill_row_indexes();
-        fill_gear_slots();
-    }
-
-    // this one creates a map (dictionary) of letters and their matching indexes
-    // depending on amound of rows. example: 'A': 0, 'B': 1 and so on until the amout is equeal to rows
-    void fill_row_indexes()
-    {
-        int numeric_value_of_capital_letter = 65;
-        for (int i = 0; i < rows; i++)
-        {
-            row_indexes[char(numeric_value_of_capital_letter)] = i;
-            numeric_value_of_capital_letter++;
-        }
-    }
-
-    void fill_gear_slots() // indexes of gear slots // used in swap items
-    {
-        gear_slots["helmet"] = 0;
-        gear_slots["chestplate"] = 1;
-        gear_slots["leggins"] = 2;
-        gear_slots["boots"] = 3;
-        gear_slots["weapon"] = 4;
-        gear_slots["shield"] = 5;
-    }
-
-
-    int get_gear_slot_index(string item_slot_type)
-    {
-        for (const auto& pair : this->gear_slots) {
-            if (item_slot_type == pair.first)
-            {
-                return pair.second;
-            }
-        }
-        return -1;
-    }
-
-
-    void display()
-    {
-        cout << " ==============================" << endl;
-        cout << setw(4);
-        for(int numeration = 0; numeration < cols; numeration++)
-        {
-            cout << " " << numeration + 1 << " ";
-        }
-        cout << endl << setw(3);
-
-
-        for (int i = 0; i < rows; i++)
-        {
-            cout << letters[i];
-            for(int j = 0; j < cols; j++)
-            {
-                if(tab[i][j] == nullptr)
+                int damage_to_enemy = player_dmg - enemy_defence;
+                if(damage_to_enemy < 0 && enemy_attack == 0) //if defence bigger than attack
                 {
-                    cout << "[ ]";
+                    enemy_hp--;
+                }
+                else if(enemy_attack == 0)
+                {
+                    enemy_hp = enemy_hp - damage_to_enemy;
+                }
+                else if(enemy_attack == 1)
+                {
+                    enemy_hp = enemy_hp - (damage_to_enemy / 2);
+                }
+
+                int damage_to_player = enemy_damage - player_defence;
+                if(damage_to_player < 0 && enemy_attack == 0)
+                {
+                    player_hp--;
+                }
+                else if(enemy_attack == 0)
+                {
+                    player_hp = player_hp - damage_to_player;
+                }
+
+            }
+            else if(option_attack[0] == 'D' || option_attack[0] == 'd')  //place holder just for now. later it will be replaced for wsad movement
+            {
+                int damage_to_player = enemy_damage - player_defence;
+                if(damage_to_player < 0 && enemy_attack == 0)
+                {
+                    string message = "Player defended the attack!";
+                }
+            }
+        }
+    }
+
+    void show_message(string message)
+    {
+        /* //dont need the code but i just cant get rid of it (put too much work to it)
+        int last_space = 0;
+        vector<string> word_list;
+        int counter = 0;
+        for(int i = 0; i < message.size(); i++) //this loop splits string into diffrent words by space (i know i could have done it by not splitting that but then there will be a problem if a string is to long for a display window) yea i love bringing my self pain
+        {
+            if(message[i] == ' ')
+            {
+                string word;
+                int counter2 = 0;
+                for(int y = last_space; y < i; y++) //some calculations 0-5 "sring| is |good"// its useles now :3 // i was trying to figure out how to split that string
+                {
+                    word[counter2] = message[y];
+                    counter2++;
+                }
+                if(i - 1 == last_space)
+                {
+                    char letter = message[i - 1];
+                    string letter_string(1, letter);
+                    word_list.push_back(letter_string);
                 }
                 else
                 {
-                    cout <<"[" << tab[i][j]->display_name << "]";
+                    word_list.push_back(word);
                 }
+                last_space += i + 1;
+                counter++;
             }
-            cout << endl << setw(3);
-        }
-        cout << "#";
-        for(int i = 0; i < 6; i++)
+        }*/
+
+        cout << "=============================================================" << endl << endl; //this thing has 61 characters and 55 to look nicely
+        //cout << "|  "; //yeaaaa its part of that code :|
+        cout << "   "; //<< but spaces look better// XD i automaticaly wrote it as cout element. imma leave it
+        //int counter_int = 0; // you know the drill. Its part of that code
+        for(int k = 0; k < message.size(); k++) //this loop wil print out all of the words letter by letter
         {
-            if(battle_slots[i] == nullptr)
+
+        }
+    }
+
+};
+
+class Game
+{
+
+
+public:
+    Inventory* I;
+    bool isRunning;
+    bool tutorial;
+    map<int, string> operationOptions;
+    Game()
+    {
+        isRunning = true;
+        I = new Inventory();
+
+        operationOptions[0] = "defaulut";
+        operationOptions[0] = "inspect";
+        operationOptions[0] = "swap";
+    }
+    void chagne_tutorial_state(bool changer)
+    {
+        if(changer != tutorial)
+        {
+            tutorial = changer;
+        }
+    }
+    void run()
+    {
+        do{
+
+        }while (isRunning);
+    }
+    void Game_loop()
+    {
+        string user_input;
+
+        cout << "=============================================================" << endl << endl;
+        cout << "[INVENTORY]  [SHOP]  [BLACKSMITH]  [EXPEDITION]  [CLOSE GAME]" << endl << endl;
+        cout << "=============================================================" << endl;
+
+        cout << "choose one option: ";
+        getline(cin, user_input);
+        cout << endl;
+
+
+            string inventory_user_input;
+            I->display();
+
+            cout << endl << "Enter a command: ";
+            getline(cin, inventory_user_input);
+            cout << endl;
+
+            if(inventory_user_input[0] == 's'|| inventory_user_input[1] == 'S')
             {
-                cout << "{ }";
+                string first_cords;
+                string second_cords;
+
+                cout << "Enter first coordinates: ";
+                getline(cin, first_cords);
+                cout << endl;
             }
             else
             {
-                cout << "{" << battle_slots[i]->display_name << "}";
+                Expedition exp;
+                exp.fill_gear(I);
             }
         }
-        cout << endl;
-    }
 
-
-    void add_item(int row_cords, int col_cords, const Item& itemToAdd) //This code adds temprorary items to the inventory
-    {
-        tab[row_cords - 1][col_cords - 1] = new Item(itemToAdd);
-    }
-
-
-    void add_gear_to_main(int row_cords, int col_cords, const Gear& gearToAdd)
-    {
-        const Item* itemToAdd = dynamic_cast<const Item*>(&gearToAdd);
-        tab[row_cords - 1][col_cords - 1] = new Item(*itemToAdd);
-    }
-
-    // returns processed cord
-    auto get_processed_cords(string cords) -> vector<int>
-    {
-        auto process_cords_row = [this](string cords) -> int
-        {
-            char letter = char(cords[0]);
-
-            if((int(letter) >= 65) && (int(letter) <= 90)) // from capital A-Z
-            {
-                for (const auto& pair : this->row_indexes) {
-                    if (pair.first == letter)
-                    {
-                        return pair.second;
-                    }
-                }
-            } else if(int(letter) == 35) // # character
-            {
-                return -1;
-            }
-            return -2;
-        };
-
-        int cords_row = process_cords_row(cords);
-        int cords_col = (cords[1] - '0') - 1;
-
-        return {cords_row, cords_col};
-    }
-
-
-    int is_valid_cords_input(string cords)
-    {
-        if (cords.size() > 2 || cords.size() < 2)
-        {
-            return -1;
-        }
-
-        int cords_row = get_processed_cords(cords)[0];
-        int cords_col = get_processed_cords(cords)[1];
-
-        // in main
-        if ((cords_row >= 0 && cords_row < this->rows) && (cords_col >= 0 && cords_col < this->cols))
-        {
-            return 1;
-        }
-        // in gear
-        else if((cords_row == -1) && (cords_col >= 0 && cords_col <= 5))
-        {
-            return 0;
-        }
-        // out of range/complete nonsense
-        else
-        {
-            return -1;
-        }
-    }
-
-
-    void swap_items(string cords1, string cords2)
-    {
-        if (is_valid_cords_input(cords1) >= 0 && is_valid_cords_input(cords2) >= 0)
-        {
-            // indexes -  do not corelate with numbers in console display // prc = processed (integer indexes)
-
-            vector<int> cords1_prc = get_processed_cords(cords1); // list[0] - row ; list[1] - col
-            vector<int> cords2_prc = get_processed_cords(cords2);
-
-            // if first input is in gear and second in main inventory
-            if(cords1_prc[0] == -1 && cords2_prc[0] >= 0)
-            {
-                Item* first = battle_slots[cords1_prc[1]]; // from gear slots
-                Item* second = tab[cords2_prc[0]][cords2_prc[1]]; // from main inventory
-
-                //both slots are NOT empty
-                if (first != nullptr && second != nullptr)
-                {
-                    if (first->slot_type == second->slot_type) // both are same gear
-                    {
-                        battle_slots[cords1_prc[1]] = second;
-                        tab[cords2_prc[0]][cords2_prc[1]] = first;
-                    } else
-                    {
-                        cout << "The selected items are not the same gear!" << endl;
-                    }
-                }
-
-                // only first, gear slot is empty
-                else if(first == nullptr && second != nullptr)
-                {
-                    if (cords1_prc[1] == get_gear_slot_index(second->slot_type)) // if slot is correct
-                    {
-                        battle_slots[cords1_prc[1]] = second;
-                        tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
-                    } else
-                    {
-                        cout << "Wrong slot!" << endl;
-                    }
-                }
-
-                // only second, general inventory slot is empty
-                else if(first != nullptr && second == nullptr)
-                {
-                    battle_slots[cords1_prc[1]] = nullptr;
-                    tab[cords2_prc[0]][cords2_prc[1]] = first;
-                }
-
-                // both are empty
-                else if (first == nullptr && second == nullptr)
-                {
-                    cout << "Both slots are empty!" << endl;
-                }
-            }
-
-
-            // if first input is in main and second in gear
-            else if(cords1_prc[0] >= 0 && cords2_prc[0] == -1)
-            {
-                Item* first = tab[cords1_prc[0]][cords1_prc[1]];
-                Item* second = battle_slots[cords2_prc[1]];
-
-                //both slots are NOT empty
-                if (first != nullptr && second != nullptr)
-                {
-                    if (first->slot_type == second->slot_type)
-                    {
-                        tab[cords1_prc[0]][cords1_prc[1]] = second;
-                        battle_slots[cords2_prc[1]] = first;
-                    } else
-                    {
-                        cout << "The selected items are not the same gear!" << endl;
-                    }
-                }
-
-                // first, main slot is empty
-                else if(first == nullptr && second != nullptr)
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = second;
-                    battle_slots[cords2_prc[1]] = nullptr;
-                }
-
-                // second, gear slot is empty
-                else if(first != nullptr && second == nullptr)
-                {
-                    if (get_gear_slot_index(first->slot_type) == cords2_prc[1]) // correct slot
-                    {
-                        tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
-                        battle_slots[cords2_prc[1]] = first;
-                    } else
-                    {
-                        cout << "Wrong slot!" << endl;
-                    }
-                }
-
-                // both are empty
-                else if (first == nullptr && second == nullptr)
-                {
-                    cout << "Both slots are empty!" << endl;
-                }
-            }
-
-
-            // if both inputs are in general
-            else if (cords1_prc[0] >= 0 && cords2_prc[0] >= 0)
-            {
-
-                Item* first = tab[cords1_prc[0]][cords1_prc[1]];
-                Item* second = tab[cords2_prc[0]][cords2_prc[1]];
-
-                // both NOT empty
-                if (first != nullptr && second != nullptr)
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = second;
-                    tab[cords2_prc[0]][cords2_prc[1]] = first;
-                }
-
-                // first empty
-                if (first == nullptr && second != nullptr)
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = second;
-                    tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
-                }
-
-                // second empty
-                if (first != nullptr && second == nullptr)
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
-                    tab[cords2_prc[0]][cords2_prc[1]] = first;
-                }
-
-                // both are empty
-                else if (first == nullptr && second == nullptr)
-                {
-                    cout << "Both slots are empty!" << endl;
-                }
-            }
-        } else
-        {
-            cout << "Your input is invalid!" << endl;
-        }
-    }
-    
-    void getInfo(string cords)
-    {
-        if (is_valid_cords_input(cords) >= 0)
-        {
-            vector<int> cords_prc = get_processed_cords(cords);
-            
-            // in main
-            if (cords_prc[0] >= 0)
-            {
-                tab[cords_prc[0]][cords_prc[1]]->get_data();
-            }
-            
-            // in gear
-            else if (cords_prc[0] == -1)
-            {
-                battle_slots[cords_prc[0]]->get_data();
-            }
-            
-        } else
-        {
-            cout << "Your input is invalid!" << endl;
-        }
-    }
-
-    ~Inventory()
-    {
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                delete[] tab[i][j];
-            }
-        }
-        for(int i = 0; i < rows; i++)
-        {
-            delete[] tab[i];
-        }
-        delete[] tab;
-
-        //deletes gear items and list
-        for (int i = 0; i < 6; i++)
-        {
-            delete[] battle_slots[i];
-        }
-        delete[] battle_slots;
-    }
-    // add random will be done differently. how about we make classes
-    //with specific items like wood, roman shield, knife. this way we have a created set of existing items.
-    //the classes could have methods like generate random or random stats and so on
-    // class items, helmets, leggins etc
 };
 
-class Items
-{
-public:
-    vector<Item> item_list;
 
-    Items()
-    {
-        item_list = {
-            Item(1, "Wood", "W", "Resourse", "General", "Common"),
-            Item(1, "Stone", "S", "Resourse", "General", "Common"),
-            Item(1, "Metal", "M", "Resourse", "General", "Uncommon"),
-            Item(1, "Rope", "R", "Resourse", "General", "Uncommon"),
-            Item(1, "Stick", "S", "Resourse", "General", "Common")
-        };
-    }
-
-    int getRandomIndex()
-    {
-        srand(time(NULL));
-        return rand() % item_list.size();
-    }
-
-    Item getRandomItem()
-    {
-        return item_list[getRandomIndex()];
-    }
-
-    void setRandomAmount(int itemIndex) // can be specific or random
-    {
-        srand(time(NULL));
-
-        for (int i = 0; i < item_list.size(); i++)
-        {
-            int randAmount = rand() % 5 + 1;
-            item_list[i].amount = randAmount;
-        }
-    }
-
-};
 
 int main()
 {
-
+    /*   //test code
     Inventory I;
 
     I.add_item(2, 4, Item(0, "", "1"));
@@ -445,15 +238,13 @@ int main()
     I.add_gear_to_main(1, 1, Boots(0, "", "B"));
     I.add_gear_to_main(1, 6, Weapon(0, "", "W"));
 
-    I.display();
 
-    //I.swap_items("#5", "A6");
-    //I.display();
-    //I.swap_items("#5", "D1");
-    I.swap_items("D2", "#3");
+    I.swap_items("A6", "#5");
 
+    I.add_gold(777);
+    */
+    Game g;
+    g.Game_loop();
 
-    I.display();
     return 0;
 }
-
