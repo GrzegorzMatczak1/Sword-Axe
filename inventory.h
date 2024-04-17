@@ -52,7 +52,10 @@ public:
     int is_valid_cords_input(string cords);
 
 
-    void swap_items(string cords1, string cords2);
+    string swap_items(string cords1, string cords2);
+
+
+    string delete_an_item(string cords);
 
 
     void getInfo(string cords);
