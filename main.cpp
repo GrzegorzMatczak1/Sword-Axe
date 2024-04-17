@@ -224,11 +224,11 @@ public:
         string cords1;
         string cords2;
 
-        cout << "First element: ";
+        cout << "  First element: ";
         cin >> cords1;
         cout << endl;
 
-        cout << "Second element: ";
+        cout << "  Second element: ";
         cin >> cords2;
         cout << endl;
 
@@ -250,7 +250,7 @@ public:
 
         string cords;
 
-        cout << "Delete an item: ";
+        cout << "  Delete an item: ";
         cin >> cords;
         cout << endl;
 
