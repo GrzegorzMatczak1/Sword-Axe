@@ -88,6 +88,15 @@ public:
         logsMessage = "Welcome!";
         currentOperation = "default";
 
+        Items It;
+
+        I->add_item(2, 4, It.getRandomItem());
+        I->add_item(4, 1, It.getRandomItem());
+        I->add_item(3, 8, It.getRandomItem());
+        I->add_item(1, 4, It.getRandomItem());
+        I->add_gear_to_main(1, 1, Boots(0, "", "B"));
+        I->add_gear_to_main(1, 6, Weapon(0, "", "W"));
+
         // this all will basically be used for displaying specific operations
         // when we select some, the terminal will be cleared and display the specific menu
         // that way we have only what's necessary on display
@@ -101,7 +110,7 @@ public:
         typesOfOperations[Operations::Exit] = "exit";
 
         //we'll probably need to add: delete/disassemble, exit menu, shop, blacksmith, combat(fighting enemies or whatever) and maybe something else
-    }
+        }
 
     void run()
     {
@@ -152,6 +161,7 @@ public:
             break;
         default:
             cout << "Some kind of error!" << endl;
+            break;
         }
     }
 
@@ -169,9 +179,7 @@ public:
 
     void mainMenu()
     {
-        cout << endl << "  Inventory:" << endl;
-        I->display();
-        cout << endl;
+        inventoryDisplay();
 
         cout << endl << "  Possible actions:" << endl;
         cout << "  1. Swap items." << endl;
@@ -209,7 +217,24 @@ public:
 
     void swapMenu()
     {
-        // nothing yet
+        inventoryDisplay();
+
+        cout << endl << "  Enter two coordinates to swap." << endl;
+
+        string cords1;
+        string cords2;
+
+        cout << "First element: ";
+        cin >> cords1;
+        cout << endl;
+
+        cout << "Second element: ";
+        cin >> cords2;
+        cout << endl;
+
+        logsMessage = I->swap_items(cords1, cords2);
+
+        currentOperation = "default";
     }
 
     void inspectMenu()
@@ -219,7 +244,24 @@ public:
 
     void dropMenu()
     {
-        // nothing there yet
+        inventoryDisplay();
+
+        cout << endl << "  Enter coordinate to delete." << endl;
+
+        string cords;
+
+        cout << "Delete an item: ";
+        cin >> cords;
+        cout << endl;
+
+        logsMessage = I->delete_an_item(cords);
+
+        currentOperation = "default";
+    }
+
+    void sortMenu()
+    {
+        // empty
     }
 
     void logsDisplay()
@@ -230,14 +272,21 @@ public:
         cout << "\n";
     }
 
+    void inventoryDisplay()
+    {
+        cout << endl << "  Inventory:" << endl;
+        I->display();
+        cout << endl;
+    }
+
     void clear()
     {
-        #ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
         system("cls");
-        #elif defined(PLATFORM_MACOS)
+#elif defined(PLATFORM_MACOS)
         system("clear");
-        #else
-        #endif
+#else
+#endif
     }
 
     ~Game()
@@ -254,8 +303,8 @@ int main()
     //game.gameDisplay();
     game.run();
 
-    Inventory I;
-    Items It;
+    //Inventory I;
+    //Items It;
 
     //I.add_item(2, 4, It.getRandomItem());
     //I.add_item(4, 1, It.getRandomItem());
