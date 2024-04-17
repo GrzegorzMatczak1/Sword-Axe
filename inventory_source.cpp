@@ -170,7 +170,7 @@ int Inventory::is_valid_cords_input(string cords)
     }
 }
 
-void Inventory::swap_items(string cords1, string cords2)
+string Inventory::swap_items(string cords1, string cords2)
 {
     if (is_valid_cords_input(cords1) >= 0 && is_valid_cords_input(cords2) >= 0)
     {
@@ -178,6 +178,11 @@ void Inventory::swap_items(string cords1, string cords2)
 
         vector<int> cords1_prc = get_processed_cords(cords1); // list[0] - row ; list[1] - col
         vector<int> cords2_prc = get_processed_cords(cords2);
+
+        auto successMessage = []() -> string
+        {
+            return "Swap successful";
+        };
 
         // if first input is in gear and second in main inventory
         if(cords1_prc[0] == -1 && cords2_prc[0] >= 0)
@@ -192,9 +197,11 @@ void Inventory::swap_items(string cords1, string cords2)
                 {
                     battle_slots[cords1_prc[1]] = second;
                     tab[cords2_prc[0]][cords2_prc[1]] = first;
+
+                    return successMessage();
                 } else
                 {
-                    cout << "The selected items are not the same gear!" << endl;
+                    return "The selected items are not the same gear! Swap unsuccessful.";
                 }
             }
 
@@ -205,9 +212,11 @@ void Inventory::swap_items(string cords1, string cords2)
                 {
                     battle_slots[cords1_prc[1]] = second;
                     tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
+
+                    return successMessage();
                 } else
                 {
-                    cout << "Wrong slot!" << endl;
+                    return "Wrong slot! Swap unsuccessful.";
                 }
             }
 
@@ -216,12 +225,14 @@ void Inventory::swap_items(string cords1, string cords2)
             {
                 battle_slots[cords1_prc[1]] = nullptr;
                 tab[cords2_prc[0]][cords2_prc[1]] = first;
+
+                return successMessage();
             }
 
             // both are empty
             else if (first == nullptr && second == nullptr)
             {
-                cout << "Both slots are empty!" << endl;
+                return "Both slots are empty! Swap unsuccessful.";
             }
         }
 
@@ -239,9 +250,11 @@ void Inventory::swap_items(string cords1, string cords2)
                 {
                     tab[cords1_prc[0]][cords1_prc[1]] = second;
                     battle_slots[cords2_prc[1]] = first;
+
+                    return successMessage();
                 } else
                 {
-                    cout << "The selected items are not the same gear!" << endl;
+                    return "The selected items are not the same gear! Swap unsuccessful.";
                 }
             }
 
@@ -250,6 +263,8 @@ void Inventory::swap_items(string cords1, string cords2)
             {
                 tab[cords1_prc[0]][cords1_prc[1]] = second;
                 battle_slots[cords2_prc[1]] = nullptr;
+
+                return successMessage();
             }
 
             // second, gear slot is empty
@@ -259,16 +274,18 @@ void Inventory::swap_items(string cords1, string cords2)
                 {
                     tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
                     battle_slots[cords2_prc[1]] = first;
+
+                    return successMessage();
                 } else
                 {
-                    cout << "Wrong slot!" << endl;
+                    return "Wrong slot! Swap unsuccessful.";
                 }
             }
 
             // both are empty
             else if (first == nullptr && second == nullptr)
             {
-                cout << "Both slots are empty!" << endl;
+                return "Both slots are empty! Swap unsuccessful.";
             }
         }
 
@@ -285,6 +302,8 @@ void Inventory::swap_items(string cords1, string cords2)
             {
                 tab[cords1_prc[0]][cords1_prc[1]] = second;
                 tab[cords2_prc[0]][cords2_prc[1]] = first;
+
+                return successMessage();
             }
 
             // first empty
@@ -292,6 +311,8 @@ void Inventory::swap_items(string cords1, string cords2)
             {
                 tab[cords1_prc[0]][cords1_prc[1]] = second;
                 tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
+
+                return successMessage();
             }
 
             // second empty
@@ -299,17 +320,72 @@ void Inventory::swap_items(string cords1, string cords2)
             {
                 tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
                 tab[cords2_prc[0]][cords2_prc[1]] = first;
+
+                return successMessage();
             }
 
             // both are empty
             else if (first == nullptr && second == nullptr)
             {
-                cout << "Both slots are empty!" << endl;
+                return "Both slots are empty! Swap unsuccessful.";
             }
         }
     } else
     {
-        cout << "Your input is invalid!" << endl;
+        return "Your input is invalid! Swap unsuccessful.";
+    }
+}
+
+
+string Inventory::delete_an_item(string cords)
+{
+    // input is valid
+    if (is_valid_cords_input(cords) >= 0)
+    {
+        vector<int> cords_prc = get_processed_cords(cords);
+
+        // in general
+        if (cords_prc[0] >= 0)
+        {
+
+            if (tab[cords_prc[0]][cords_prc[1]] != nullptr)
+            {
+                delete tab[cords_prc[0]][cords_prc[1]];
+
+                tab[cords_prc[0]][cords_prc[1]] = nullptr;
+
+                return "Delete successful!";
+            }
+            else
+            {
+                return "The slot is empty! Delete unsuccessful!";
+            }
+        }
+        // in gear
+        else if(cords_prc[0] == -1)
+        {
+
+            if (battle_slots[cords_prc[1]] != nullptr)
+            {
+                delete battle_slots[cords_prc[1]];
+
+                battle_slots[cords_prc[1]] = nullptr;
+
+                return "Delete successful!";
+            }
+            else
+            {
+                return "The slot is empty! Delete unsuccessful!";
+            }
+        }
+        else
+        {
+            return "Some kind of error! Delete unsuccessful.";
+        }
+    }
+    else
+    {
+        return "Invalid input! Delete unsuccessful.";
     }
 }
 
