@@ -7,6 +7,7 @@
 #include "item.h"
 #include "inventory.h"
 #include <random>
+#include <ncurses.h>
 
 // for platform specific functionality //  for now only clear() method in Game
 #if defined(_WIN32)
@@ -58,6 +59,62 @@ public:
         {
             int randAmount = dis(gen);
             item_list[i].amount = randAmount;
+        }
+    }
+};
+
+class Rarity
+{
+public:
+    string name;
+    float defenceMultiplier;
+    float damageMultiplier;
+
+    Rarity(string name, float defenceMultiplier, float damageMultiplier)
+        : name{name}, defenceMultiplier{defenceMultiplier}, damageMultiplier{damageMultiplier} {}
+
+    Rarity(string name = "nonexistent"){}
+
+
+};
+
+class Rarities
+{
+public:
+    vector<Rarity> rarities;
+
+    Rarities()
+    {
+        rarities = {
+            Rarity("Common", 0.0, 0.0),
+            Rarity("Uncommon", 0.075, 0.075),
+            Rarity("Rare", 0.15, 0.15),
+            Rarity("Epic", 0.225, 0.225),
+            Rarity("Legendary", 0.4, 0.4)
+        };
+    }
+
+    Rarity getRarity(string name)
+    {
+        for (int i = 0; i < rarities.size(); i++)
+        {
+            if (rarities[i].name == name)
+            {
+                return rarities[i];
+            }
+        }
+        return Rarity();
+    }
+
+    template<typename T>
+    void applyRarityMultipliers(T* gear)
+    {
+        if (is_same<T, Weapon>)
+        {
+            gear->actual_damage = int(gear->base_damage + (gear->base_damage * getRarity(gear->rarity).damageMultiplier));
+        } else if (is_same<T, Shield> || is_same<T, Armor>)
+        {
+            gear->actual_defence = int(gear->base_defence + (gear->base_defence * getRarity(gear->rarity).defenceMultiplier));
         }
     }
 };
@@ -116,19 +173,14 @@ public:
     {
         while(isRunning){
             clear();
-
-
-
             gameDisplay();
         }
 
         clear();
 
-        clear();
-
         cout << endl;
         cout << "-----------------------------------------" << endl;
-        cout << "Thanks for playing!" << endl;
+        cout << "  Thanks for playing!" << endl;
         cout << "-----------------------------------------" << endl;
     }
 
@@ -195,6 +247,7 @@ public:
         if (input == "1")
         {
             currentOperation = "swap";
+            logsMessage = "Item swapping!";
         }
         else if (input == "2")
         {
@@ -217,6 +270,7 @@ public:
 
     void swapMenu()
     {
+
         inventoryDisplay();
 
         cout << endl << "  Enter two coordinates to swap." << endl;
@@ -315,3 +369,4 @@ int main()
 
     return 0;
 }
+
