@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include "inventory.h"
+#include <vector>
 
 using namespace std;
 
@@ -334,6 +335,7 @@ string Inventory::swap_items(string cords1, string cords2)
     {
         return "Your input is invalid! Swap unsuccessful.";
     }
+    return "Hi!";
 }
 
 
@@ -390,7 +392,7 @@ string Inventory::delete_an_item(string cords)
 }
 
 
-void Inventory::getInfo(string cords)
+string Inventory::getInfo(string cords)
 {
     if (is_valid_cords_input(cords) >= 0)
     {
@@ -404,75 +406,60 @@ void Inventory::getInfo(string cords)
         }
         else if (cords_prc[0] == -1)
         {
-            item = battle_slots[cords_prc[0]];
-        }
-
-        if (item->slot_type != "general")
-        {
-            Weapon* w = getObjectFromPointer<Weapon>(item);
-            Shield* s = getObjectFromPointer<Shield>(item);
-            Helmet* h = getObjectFromPointer<Helmet>(item);
-            Chestplate* c = getObjectFromPointer<Chestplate>(item);
-            Leggins* l = getObjectFromPointer<Leggins>(item);
-            Boots* b = getObjectFromPointer<Boots>(item);
-
-            if (w)
-            {
-                w->get_data();
-            }
-            else if (s)
-            {
-                s->get_data();
-            }
-            else if (h)
-            {
-                h->get_data();
-            }
-            else if (c)
-            {
-                c->get_data();
-            }
-            else if (l)
-            {
-                l->get_data();
-            }
-            else if (b)
-            {
-                b->get_data();
-            }
-            else
-            {
-                cout << "An error!" << endl;
-            }
+            item = battle_slots[cords_prc[1]];
         }
         else
         {
+            item = nullptr;
+        }
+
+        if (item != nullptr)
+        {
             item->get_data();
+            return "Inspection successful!";
         }
-
-
-        // in main
-        if (cords_prc[0] >= 0)
+        else
         {
-            tab[cords_prc[0]][cords_prc[1]]->get_data();
+            return "The slot is empty!";
         }
 
-        // in gear
-        else if (cords_prc[0] == -1)
-        {
-            battle_slots[cords_prc[0]]->get_data();
-        }
-
-    } else
+    }
+    else
     {
-        cout << "Your input is invalid!" << endl;
+        return "Your input is invalid!";
     }
 }
 
-template<typename T>
-T* Inventory::getObjectFromPointer(Item* pointer)
+vector<int> Inventory::getFirstEmptySlot()
 {
-    return dynamic_cast<T*>(pointer);
+    for (int i = 0; i < this->rows; i++)
+    {
+        for (int j = 0; j < this->cols; j++)
+        {
+            return {rows, cols};
+        }
+    }
+    return {-1, -1}; // inventory full
+}
+
+string Inventory::upgradeAnItem(string cords)
+{
+    if (is_valid_cords_input(cords) >= 0)
+    {
+        return "";
+    }
+    else
+    {
+        return "Invalid input! Upgrade unsuccessful.";
+    }
+}
+
+
+string Inventory::disassembleAnItem(string cords)
+{
+
+    return "";
+
 }
 
 Inventory::~Inventory()
