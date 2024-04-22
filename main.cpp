@@ -6,8 +6,7 @@
 #include <string>
 #include "item.h"
 #include "inventory.h"
-#include <random>
-#include <ncurses.h>
+#include "items.h"
 
 // for platform specific functionality //  for now only clear() method in Game
 #if defined(_WIN32)
@@ -19,105 +18,6 @@
 
 
 using namespace std;
-
-class Items
-{
-public:
-    vector<Item> item_list;
-
-    Items()
-    {
-        item_list = {
-            Item(1, "Wood", "W", "Resourse", "general", "Common"),
-            Item(1, "Stone", "S", "Resourse", "general", "Common"),
-            Item(1, "Metal", "M", "Resourse", "general", "Uncommon"),
-            Item(1, "Rope", "R", "Resourse", "general", "Uncommon"),
-            Item(1, "Stick", "S", "Resourse", "general", "Common")
-        };
-    }
-
-    int getRandomIndex()
-    {
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_int_distribution<> dis(0, item_list.size() - 1); // nwm jak to działa. ale przynajmniej nie zwraca takich samych wartości jak sie wywoła kilka razy w tej samej sekundzie
-        return dis(gen);
-    }
-
-    Item getRandomItem()
-    {
-        return item_list[getRandomIndex()];
-    }
-
-    void setRandomAmount(int itemIndex) // can be specific or random
-    {
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_int_distribution<> dis(1, item_list.size());
-
-        for (int i = 0; i < item_list.size(); i++)
-        {
-            int randAmount = dis(gen);
-            item_list[i].amount = randAmount;
-        }
-    }
-};
-
-class Rarity
-{
-public:
-    string name;
-    float defenceMultiplier;
-    float damageMultiplier;
-
-    Rarity(string name, float defenceMultiplier, float damageMultiplier)
-        : name{name}, defenceMultiplier{defenceMultiplier}, damageMultiplier{damageMultiplier} {}
-
-    Rarity(string name = "nonexistent"){}
-
-
-};
-
-class Rarities
-{
-public:
-    vector<Rarity> rarities;
-
-    Rarities()
-    {
-        rarities = {
-            Rarity("Common", 0.0, 0.0),
-            Rarity("Uncommon", 0.075, 0.075),
-            Rarity("Rare", 0.15, 0.15),
-            Rarity("Epic", 0.225, 0.225),
-            Rarity("Legendary", 0.4, 0.4)
-        };
-    }
-
-    Rarity getRarity(string name)
-    {
-        for (int i = 0; i < rarities.size(); i++)
-        {
-            if (rarities[i].name == name)
-            {
-                return rarities[i];
-            }
-        }
-        return Rarity();
-    }
-
-    template<typename T>
-    void applyRarityMultipliers(T* gear)
-    {
-        if (is_same<T, Weapon>)
-        {
-            gear->actual_damage = int(gear->base_damage + (gear->base_damage * getRarity(gear->rarity).damageMultiplier));
-        } else if (is_same<T, Shield> || is_same<T, Armor>)
-        {
-            gear->actual_defence = int(gear->base_defence + (gear->base_defence * getRarity(gear->rarity).defenceMultiplier));
-        }
-    }
-};
 
 class Game
 {
@@ -132,6 +32,9 @@ public:
         Swap,
         Inspect,
         Drop,
+        Blacksmith,
+        Upgrade,
+        Disassemble,
 
         Exit,
         Error
@@ -151,22 +54,20 @@ public:
         I->add_item(4, 1, It.getRandomItem());
         I->add_item(3, 8, It.getRandomItem());
         I->add_item(1, 4, It.getRandomItem());
-        I->add_gear_to_main(1, 1, Boots(0, "", "B"));
-        I->add_gear_to_main(1, 6, Weapon(0, "", "W"));
+        I->add_gear_to_main(1, 1, Boots("", "B"));
+        I->add_gear_to_main(1, 6, Weapon("", "W"));
 
-        // this all will basically be used for displaying specific operations
-        // when we select some, the terminal will be cleared and display the specific menu
-        // that way we have only what's necessary on display
-        // example: during inputing an item to inspect, we don't need to have a shop displayed
 
         typesOfOperations[Operations::Default] = "default"; // display main menu
         typesOfOperations[Operations::Swap] = "swap";
         typesOfOperations[Operations::Inspect] = "inspect";
         typesOfOperations[Operations::Drop] = "drop";
+        typesOfOperations[Operations::Blacksmith] = "blacksmith";
+        typesOfOperations[Operations::Upgrade] = "upgrade";
+        typesOfOperations[Operations::Disassemble] = "disassemble";
 
         typesOfOperations[Operations::Exit] = "exit";
 
-        //we'll probably need to add: delete/disassemble, exit menu, shop, blacksmith, combat(fighting enemies or whatever) and maybe something else
         }
 
     void run()
@@ -204,6 +105,15 @@ public:
         case Operations::Drop:
             dropMenu();
             break;
+        case Operations::Blacksmith:
+            blacksmithMenu();
+            break;
+        case Operations::Upgrade:
+            upgradeMenu();
+            break;
+        case Operations::Disassemble:
+            disassembleMenu();
+            break;
 
         case Operations::Exit:
             isRunning = !isRunning;
@@ -237,6 +147,7 @@ public:
         cout << "  1. Swap items." << endl;
         cout << "  2. Inspect an item." << endl;
         cout << "  3. Drop an item" << endl;
+        cout << "  4. Visit the blacksmith" << endl;
         cout << "  exit. Exit game." << "\n\n";
 
         string input;
@@ -252,10 +163,17 @@ public:
         else if (input == "2")
         {
             currentOperation = "inspect";
+            logsMessage = "Item inspecting!";
         }
         else if (input == "3")
         {
             currentOperation = "drop";
+            logsMessage = "Item dropping!";
+        }
+        else if (input == "4")
+        {
+            currentOperation = "blacksmith";
+            logsMessage = "Welcome to the blacksmith!";
         }
 
         else if (input == "exit")
@@ -264,7 +182,7 @@ public:
         }
         else
         {
-            logsMessage = "Couldn't pick an option. Your input must be invalid! Try typing a number next time!";
+            logsMessage = "Couldn't pick an option. Your input must be invalid! Try typing a number!";
         }
     }
 
@@ -293,7 +211,72 @@ public:
 
     void inspectMenu()
     {
-        // work in progress
+        inventoryDisplay();
+
+        string input;
+        cout << "Select an item: ";
+        cin >> input;
+
+        cout << endl;
+
+        logsMessage = I->getInfo(input);
+
+        cout << endl;
+        string input1;
+        cout << "Type anything to continue: ";
+        cin >> input1;
+
+        currentOperation = "default";
+    }
+
+    void blacksmithMenu()
+    {
+        cout << "  Chose an operation you'd like to perform." << endl;
+        cout << "  1. Upgrade an item." << endl;
+        cout << "  2. Disassemble an item." << endl;
+        cout << "  3. Exit." << endl;
+
+        string input;
+        cout << "  Input: " << endl;
+        cin >> input;
+
+        if (input == "1")
+        {
+            logsMessage = "Upgrading!";
+            currentOperation = "upgrade";
+        }
+        else if (input == "2")
+        {
+            logsMessage = "Disassembling!";
+            currentOperation = "disassemble";
+        }
+        else if (input == "3")
+        {
+            logsMessage = "Blacksmith exited.";
+            currentOperation = "default";
+        }
+        else
+        {
+            logsMessage = "Nonexistent input! Try again.";
+            currentOperation = "blacksmith";
+        }
+    }
+
+    void upgradeMenu()
+    {
+        inventoryDisplay();
+
+        string input;
+        cout << "Select an item to upgrade: ";
+        cin >> input;
+
+
+
+        currentOperation = "blacksmith";
+    }
+    void disassembleMenu()
+    {
+
     }
 
     void dropMenu()
@@ -320,9 +303,9 @@ public:
 
     void logsDisplay()
     {
-        cout << "-----------------------------------------" << endl;
+        cout << "--------------------------------------------------------------------------------" << endl;
         cout << "  " << logsMessage << endl;
-        cout << "-----------------------------------------" << endl;
+        cout << "--------------------------------------------------------------------------------" << endl;
         cout << "\n";
     }
 
@@ -357,16 +340,21 @@ int main()
     //game.gameDisplay();
     game.run();
 
-    //Inventory I;
-    //Items It;
+    Inventory I;
+    Items It;
 
-    //I.add_item(2, 4, It.getRandomItem());
-    //I.add_item(4, 1, It.getRandomItem());
-    //I.add_item(3, 8, It.getRandomItem());
-    //I.add_item(1, 4, It.getRandomItem());
-    //I.add_gear_to_main(1, 1, Boots(0, "", "B"));
-    //I.add_gear_to_main(1, 6, Weapon(0, "", "W"));
+//    I.add_item(2, 4, It.getRandomItem());
+//    I.add_item(4, 1, It.getRandomItem());
+//    I.add_item(3, 8, It.getRandomItem());
+//    I.add_item(1, 4, It.getRandomItem());
+//    I.add_gear_to_main(1, 1, Boots("", "B"));
+//    I.add_gear_to_main(1, 6, Weapon("Sigma", "W"));
+
+//    cout << I.swap_items("A1", "#4") << endl;
+
+//    I.display();
+
+//    I.getInfo("D1");
 
     return 0;
 }
-
