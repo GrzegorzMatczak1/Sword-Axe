@@ -58,11 +58,16 @@ public:
     string delete_an_item(string cords);
 
 
-    void getInfo(string cords);
+    string getInfo(string cords);
 
 
-    template<typename T>
-    T* getObjectFromPointer(Item* pointer);
+    vector<int> getFirstEmptySlot();
+
+
+    string upgradeAnItem(string cords);
+
+
+    string disassembleAnItem(string cords);
 
 
     ~Inventory();
