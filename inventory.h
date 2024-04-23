@@ -11,6 +11,7 @@ class Inventory //Inventory Class
 public:
     Item*** tab;
     Item** battle_slots;
+    int gold;
     int rows;
     int cols;
     string letters;
@@ -36,6 +37,13 @@ public:
 
     // displays out inventory with every item that's in there
     void display();
+
+
+    void displayGold();
+
+    void increaseGold(int amount);
+
+    void decreaseGold(int amount);
 
 
     // adds an item to the inventory // user won't be able to specify where the items will be added because he sohouldn't be able to
