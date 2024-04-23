@@ -72,7 +72,7 @@ public:
         return dis(gen);
     }
 
-    Item getRandomItem()
+    Weapon getRandomItem()
     {
         return weapon_list[getRandomIndex()];
     }
@@ -105,7 +105,7 @@ public:
     }
 
 
-    Item getRandomItem()
+    Shield getRandomItem()
     {
        return shield_list[getRandomIndex()];
     }
@@ -137,7 +137,7 @@ public:
         return dis(gen);
     }
 
-    Item getRandomItem()
+    Helmet getRandomItem()
     {
         return helmet_list[getRandomIndex()];
     }
@@ -169,7 +169,7 @@ public:
         return dis(gen);
     }
 
-    Item getRandomItem()
+    Chestplate getRandomItem()
     {
         return chestplate_list[getRandomIndex()];
     }
@@ -201,7 +201,7 @@ public:
         return dis(gen);
     }
 
-    Item getRandomItem()
+    Leggins getRandomItem()
     {
         return leggins_list[getRandomIndex()];
     }
@@ -233,7 +233,7 @@ public:
         return dis(gen);
     }
 
-    Item getRandomItem()
+    Boots getRandomItem()
     {
         return boots_list[getRandomIndex()];
     }
