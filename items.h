@@ -80,6 +80,7 @@ public:
 
 class Shields
 {
+public:
     vector<Shield> shield_list;
     vector<Item> component_list;
 
@@ -112,6 +113,7 @@ class Shields
 
 class Helmets
 {
+public:
     vector<Helmet> helmet_list;
     vector<Item> component_list;
 
@@ -143,6 +145,7 @@ class Helmets
 
 class Chestplates
 {
+public:
     vector<Chestplate> chestplate_list;
     vector<Item> component_list;
 
@@ -174,6 +177,7 @@ class Chestplates
 
 class Legginses
 {
+public:
     vector<Leggins> leggins_list;
     vector<Item> component_list;
 
@@ -205,6 +209,7 @@ class Legginses
 
 class Bootses
 {
+public:
     vector<Boots> boots_list;
     vector<Item> component_list;
 
