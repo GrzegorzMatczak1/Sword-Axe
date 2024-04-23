@@ -17,9 +17,10 @@ public:
         item_list = {
             Item("Wood", "W", "general", "Common"),
             Item("Stone", "S", "general", "Common"),
-            Item("Metal", "M", "general", "Uncommon"),
-            Item("Rope", "R", "general", "Uncommon"),
-            Item("Stick", "S", "general", "Common")
+            Item("Metal", "M", "general", "Common"),
+            Item("Rope", "R", "general", "Common"),
+            Item("Stick", "S", "general", "Common"),
+            Item("Leather", "L", "general", "Common")
         };
     }
 
@@ -51,7 +52,7 @@ public:
     Weapons()
     {
         Items I;
-        component_list = I.getItems(); // [0] - wood, [1] - stone, [2] - metal, [3] - rope, [4] - stick
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         weapon_list = {
             Weapon("Sword", "S", "weapon", "Common", {component_list[2], component_list[4]}, 19),
@@ -85,16 +86,14 @@ class Shields
     Shields()
     {
         Items I;
-        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         shield_list = {
-            Shield("Wooden Shield", "S", "shield", "Common", {component_list[0], component_list[0], component_list[3]}, 15),
-            Shield("Reinforced Wooden Shield", "R", "shield", "Epic", {component_list[0], component_list[1], component_list[3]}, 17),
-            Shield("Iron Shield", "I", "shield", "Uncommon", {component_list[0], component_list[2], component_list[3]}, 20)
+            Shield("Wooden Shield", "S", "shield", "Common", {component_list[0], component_list[0], component_list[3]}, 5),
+            Shield("Reinforced Shield", "S", "shield", "Common", {component_list[0], component_list[1], component_list[3]}, 10),
+            Shield("Iron Shield", "S", "shield", "Common", {component_list[0], component_list[2], component_list[3]}, 15)
         };
     }
-
-
 
     int getRandomIndex()
     {
@@ -107,39 +106,24 @@ class Shields
 
     Item getRandomItem()
     {
-        Item randItem = shield_list[getRandomIndex()];
-
-        vector<string> rarities = {
-            "Common", "Uncommon", "Rare", "Epic", "Legendary"
-        };
-        auto randomRarity = [](vector<string> rarities)
-        {
-            random_device rd;
-            mt19937 gen(rd());
-            uniform_int_distribution<> dis(0, rarities.size() - 1);
-            return dis(gen);
-        };
-
-        randItem.rarity = randomRarity(rarities);
-
-        return randItem;
+       return shield_list[getRandomIndex()];
     }
 };
 
 class Helmets
 {
-    vector<Shield> helmet_list;
+    vector<Helmet> helmet_list;
     vector<Item> component_list;
 
     Helmets()
     {
         Items I;
-        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         helmet_list = {
-            Shield("Wooden Shield", "S", "shield", "Common", {component_list[0], component_list[0], component_list[3]}, 15),
-            Shield("Reinforced Wooden Shield", "R", "shield", "Epic", {component_list[0], component_list[1], component_list[3]}, 17),
-            Shield("Iron Shield", "I", "shield", "Uncommon", {component_list[0], component_list[2], component_list[3]}, 20)
+            Helmet("Leather Helmet", "H", "helmet", "Common", {component_list[5], component_list[3]}, 5),
+            Helmet("Reinforced Helmet", "H", "helmet", "Common", {component_list[5], component_list[3], component_list[2]}, 10),
+            Helmet("Iron Helmet", "H", "helmet", "Common", {component_list[2], component_list[2], component_list[3]}, 15)
         };
     }
 
@@ -154,6 +138,99 @@ class Helmets
     Item getRandomItem()
     {
         return helmet_list[getRandomIndex()];
+    }
+};
+
+class Chestplates
+{
+    vector<Chestplate> chestplate_list;
+    vector<Item> component_list;
+    
+    Chestplates()
+    {
+        Items I;
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
+        
+        chestplate_list = {
+            Chestplate("Leather Chestplate", "C", "chestplate", "Common", {component_list[5], component_list[3]}, 5),
+            Chestplate("Reinforced Chestplate", "C", "chestplate", "Common", {component_list[5], component_list[3], component_list[2]}, 10),
+            Chestplate("Iron Chestplate", "C", "chestplate", "Common", {component_list[2], component_list[2], component_list[3]}, 15)
+        };
+    }
+    
+    int getRandomIndex()
+    {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, chestplate_list.size() - 1);
+        return dis(gen);
+    }
+    
+    Item getRandomItem()
+    {
+        return chestplate_list[getRandomIndex()];
+    }
+};
+
+class Legginses
+{
+    vector<Leggins> leggins_list;
+    vector<Item> component_list;
+    
+    Legginses()
+    {
+        Items I;
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
+        
+        leggins_list = {
+            Leggins("Leather Leggins", "L", "leggins", "Common", {component_list[5], component_list[3]}, 5),
+            Leggins("Reinforced Leggins", "L", "leggins", "Common", {component_list[5], component_list[3], component_list[2]}, 10),
+            Leggins("Iron Leggins", "L", "leggins", "Common", {component_list[2], component_list[2], component_list[3]}, 15)
+        };
+    }
+    
+    int getRandomIndex()
+    {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, leggins_list.size() - 1);
+        return dis(gen);
+    }
+    
+    Item getRandomItem()
+    {
+        return leggins_list[getRandomIndex()];
+    }
+};
+
+class Bootses
+{
+    vector<Boots> boots_list;
+    vector<Item> component_list;
+    
+    Bootses()
+    {
+        Items I;
+        component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
+        
+        boots_list = {
+            Boots("Leather Boots", "B", "boots", "Common", {component_list[5], component_list[3]}, 5),
+            Boots("Reinforced Boots", "B", "boots", "Common", {component_list[5], component_list[3], component_list[2]}, 10),
+            Boots("Iron Boots", "B", "boots", "Common", {component_list[2], component_list[2], component_list[3]}, 15)
+        };
+    }
+    
+    int getRandomIndex()
+    {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, boots_list.size() - 1);
+        return dis(gen);
+    }
+    
+    Item getRandomItem()
+    {
+        return boots_list[getRandomIndex()];
     }
 };
 
