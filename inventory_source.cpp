@@ -8,6 +8,7 @@ using namespace std;
 Inventory::Inventory(int rows, int cols) : rows{rows}, cols{cols}
 {
     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    gold = 250;
     tab = new Item**[rows];
     for(int i = 0; i < rows; i++)
     {
@@ -94,6 +95,28 @@ void Inventory::display()
     cout << endl;
 }
 
+void Inventory::displayGold()
+{
+    cout << "  Gold: " << this->gold << endl;
+}
+
+void Inventory::increaseGold(int amount)
+{
+    this->gold += amount;
+}
+
+void Inventory::decreaseGold(int amount)
+{
+    if (this->gold < amount)
+    {
+        this->gold = 0;
+    }
+    else
+    {
+        this->gold -= amount;
+    }
+}
+
 int Inventory::get_gear_slot_index(string item_slot_type)
 {
     for (const auto& pair : this->gear_slots) {
@@ -104,7 +127,6 @@ int Inventory::get_gear_slot_index(string item_slot_type)
     }
     return -1;
 }
-
 
 void Inventory::add_item(int row_cords, int col_cords, const Item& itemToAdd)
 {
