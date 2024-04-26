@@ -1,794 +1,623 @@
 #include <iostream>
-//#include <vector>
-#include <string>
-//#include <iomanip>
-#include <cctype> //I KNOW THAT THE INCLUDES ARE VERRY MESSY
 #include <cstdlib>
-#include <stdlib.h>
-#include <memory>
+#include <time.h>
+#include <map>
+#include <vector>
+#include <string>
+#include "item.h"
+#include "inventory.h"
+#include "items.h"
 
+// for platform specific functionality //  for now only clear() method in Game
+#if defined(_WIN32)
+#define PLATFORM_WINDOWS
+#elif defined(__APPLE__)
+#define PLATFORM_MACOS
+#else
+#endif
 
 
 using namespace std;
 
-class Item //Item class
+class Enemy //Youll split it later into different files you know
 {
+    string enemy_name;
+    string introduction;
+    string win_message;
+    string loose_message;
+    int enemy_hp;
+    int enemy_dmg;
+    int enemy_defence;
+
 public:
-    int id;           //its only used for testing reasons
-    string name;
-    string display_name; //name that will be displayed in the inventory
-    string item_type; //like general, sword, axe, shield, helmet
-    string slot_type; //like armor, weapon, shield
-    int base_damage;  //how much damage the weapon normaly deals
-    int base_defence; //how much does the item remove from damage
-    string quality;   //Its like rarity but diffrent :) it just boost item stats like attack or defence
-    int amount;       //amount of an item
-    int durability;   //durability of an item
-    string* traits;   // a list of 4 traits
-    Item(int id = 0, string name = "NAN", string display_name = "!",  string item_type = "general", string slot_type = "NAN", int base_damage = 0, int base_defence = 0, string quality = "normal", int amount = 1, int durability = 10, string trait1 = "NAN", string trait2 = "NAN", string trait3 = "NAN", string trait4 = "NAN") : name{name}, display_name{display_name}, id{id}, item_type{item_type}, slot_type{slot_type}, base_damage{base_damage}, base_defence{base_defence}, quality{quality}, amount{amount}, durability{durability} //Item constructor
+
+    Enemy(string enemy_name = "Nameless", int enemy_hp = 10, int enemy_dmg = 1, int enemy_defence = 1, string introduction = "I am Namless the little prick", string win_message = "Didnt even try", string loose_message = "Whaa... I... I have lost! NOOOOOOO!") : enemy_name{enemy_name}, enemy_hp{enemy_hp}, enemy_dmg{enemy_dmg}, enemy_defence{enemy_dmg}, introduction{introduction}, win_message{win_message}, loose_message{loose_message}
     {
-        traits = new string[4];
-        traits[0] = trait1;
-        traits[1] = trait2;
-        traits[2] = trait3;
-        traits[3] = trait4;
+
     }
-    void add_trait(string trait_name, int trait_slot = 1)
+
+    string return_name()
     {
-        if(trait_slot - 1 <= 0)
-        {
-            traits[0] = trait_name;
-        }
-        else if(trait_slot - 1 >= 3)
-        {
-            traits[3] = trait_name;
-        }
-        else if(trait_slot - 1 == 1)
-        {
-            traits[1] = trait_name;
-        }
-        else if(trait_slot - 1 == 2)
-        {
-            traits[2] = trait_name;
-        }
+        return enemy_name;
+    }
+    string return_introduction()
+    {
+        return introduction;
+    }
+    string return_win_message()
+    {
+        return win_message;
+    }
+    string return_loose_message()
+    {
+        return loose_message;
+    }
+    int return_hp()
+    {
+        return enemy_hp;
+    }
+    int return_dmg()
+    {
+        return enemy_dmg;
+    }
+    int return_defence()
+    {
+        return enemy_defence;
     }
 };
 
-class Inventory //Inventory Class
+class Game
 {
 public:
-    Item*** tab; //tab is the main inventory
-    Item** battle_slots; //for the slots like shield weapon ect
-    int rows;
-    int cols;
-    string letters;
-    Inventory(int rows = 4, int cols = 9) : rows{rows}, cols{cols} //Inventory Constructor
+    Inventory* I;
+    bool isRunning;
+    string currentOperation;
+    string logsMessage; // logs info //  example: "Swap successful", "Couldn't inspect an item. Wrong input!" etc
+    enum class Operations
     {
-        tab = new Item**[rows];
-        letters = "ABCDEFGHIJKRSTUVWYZ";
-        int a = 0;
-        for(int i = 0; i < rows; i++)
-        {
-            tab[i] = new Item*[cols];
-        }
+        Default,
+        Swap,
+        Inspect,
+        Drop,
+        Blacksmith,
+        Upgrade,
+        Disassemble,
 
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                tab[i][j] = new Item(a, "NAN"); //NAN means Not A Name which lets me hide the item later
-                a++;
-            }
-        }
-        battle_slots = new Item*[6];
-        battle_slots[0] = new Item(44, "NAN", "☺", "helmet", "helmet"); //PROBLEMATIC LINE idk i saved and everything worked again XDDDD
-        battle_slots[1] = new Item(45, "NAN", "⍞", "chestplate", "chestplate");
-        battle_slots[2] = new Item(46, "NAN", "ℿ", "leggings", "leggings");
-        battle_slots[3] = new Item(47, "NAN", "ೲ", "boots", "boots");
-        battle_slots[4] = new Item(48, "NAN", "⸸", "NAN", "weapon");
-        battle_slots[5] = new Item(49, "NAN", "⛉", "shield", "shield");
+        Exit,
+        Error
+    };
+    map<Operations, string> typesOfOperations;
+
+    Game()
+    {
+        I = new Inventory();
+        isRunning = true;
+        logsMessage = "Welcome!";
+        currentOperation = "default";
+
+        Items It;
+
+        I->add_item(2, 4, It.getRandomItem());
+        I->add_item(4, 1, It.getRandomItem());
+        I->add_item(3, 8, It.getRandomItem());
+        I->add_item(1, 4, It.getRandomItem());
+        I->add_gear_to_main(1, 1, Boots("", "B"));
+        I->add_gear_to_main(1, 6, Weapon("", "W"));
+
+
+        typesOfOperations[Operations::Default] = "default"; // display main menu
+        typesOfOperations[Operations::Swap] = "swap";
+        typesOfOperations[Operations::Inspect] = "inspect";
+        typesOfOperations[Operations::Drop] = "drop";
+        typesOfOperations[Operations::Blacksmith] = "blacksmith";
+        typesOfOperations[Operations::Upgrade] = "upgrade";
+        typesOfOperations[Operations::Disassemble] = "disassemble";
+
+        typesOfOperations[Operations::Exit] = "exit";
 
     }
-    ~Inventory() //Inventory Destructor
-    {
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                delete tab[i][j];
-            }
-        }
-        for(int i = 0; i < rows; i++)
-        {
-            delete[] tab[i];
-        }
-        delete[] tab;
 
-    }
-    void display_name()
+    void run()
     {
-        cout << "------------------------------------------------------" << endl; // Spacer: its used to separate the code and makes it easier to see changes to the inventory
-        cout << "  ";
-        for(int y = 0; y < cols; y++)
-        {
-            cout << "  " << y + 1 << "   ";
+        while(isRunning){
+            clear();
+            gameDisplay();
         }
+
+        clear();
+
         cout << endl;
-        for(int i = 0; i < rows; i++)
+        cout << "-----------------------------------------" << endl;
+        cout << "  Thanks for playing!" << endl;
+        cout << "-----------------------------------------" << endl;
+    }
+
+    void gameDisplay()
+    {
+
+        logsDisplay();
+
+        Operations op = getCurrentOperation(currentOperation);
+        switch (op)
         {
-            cout << letters[i] << "  ";
-            for(int j = 0; j < cols; j++)
+        case Operations::Default:
+            mainMenu();
+            break;
+        case Operations::Swap:
+            swapMenu();
+            break;
+        case Operations::Inspect:
+            inspectMenu();
+            break;
+        case Operations::Drop:
+            dropMenu();
+            break;
+        case Operations::Blacksmith:
+            blacksmithMenu();
+            break;
+        case Operations::Upgrade:
+            upgradeMenu();
+            break;
+        case Operations::Disassemble:
+            disassembleMenu();
+            break;
+
+        case Operations::Exit:
+            isRunning = !isRunning;
+            break;
+        case Operations::Error:
+            cout << "Some kind of error!" << endl;
+            break;
+        default:
+            cout << "Some kind of error!" << endl;
+            break;
+        }
+    }
+
+    Operations getCurrentOperation(string currentOperation)
+    {
+        for (const auto& pair : typesOfOperations)
+        {
+            if (pair.second == currentOperation)
             {
-                if(tab[i][j]->name == "NAN") //Its used to make blank spaces instead of making no item (it was easier to code in a lesson)
+                return pair.first; // returns a enum operation value // will be used in gameDisplay
+            }
+        }
+        return Operations::Error;
+    }
+
+    void mainMenu()
+    {
+        inventoryDisplay();
+
+        cout << endl << "  Possible actions:" << endl;
+        cout << "  1. Swap items." << endl;
+        cout << "  2. Inspect an item." << endl;
+        cout << "  3. Drop an item" << endl;
+        cout << "  4. Visit the blacksmith" << endl;
+        cout << "  exit. Exit game." << "\n\n";
+
+        string input;
+        cout << "  Input: ";
+        cin >> input;
+        cout << endl;
+
+        if (input == "1")
+        {
+            currentOperation = "swap";
+            logsMessage = "Item swapping!";
+        }
+        else if (input == "2")
+        {
+            currentOperation = "inspect";
+            logsMessage = "Item inspecting!";
+        }
+        else if (input == "3")
+        {
+            currentOperation = "drop";
+            logsMessage = "Item dropping!";
+        }
+        else if (input == "4")
+        {
+            currentOperation = "blacksmith";
+            logsMessage = "Welcome to the blacksmith!";
+        }
+
+        else if (input == "exit")
+        {
+            currentOperation = "exit";
+        }
+        else
+        {
+            logsMessage = "Couldn't pick an option. Your input must be invalid! Try typing a number!";
+        }
+    }
+
+    void swapMenu()
+    {
+
+        inventoryDisplay();
+
+        cout << endl << "  Enter two coordinates to swap." << endl;
+
+        string cords1;
+        string cords2;
+
+        cout << "  First element: ";
+        cin >> cords1;
+        cout << endl;
+
+        cout << "  Second element: ";
+        cin >> cords2;
+        cout << endl;
+
+        logsMessage = I->swap_items(cords1, cords2);
+
+        currentOperation = "default";
+    }
+
+    void inspectMenu()
+    {
+        inventoryDisplay();
+
+        string input;
+        cout << "Select an item: ";
+        cin >> input;
+
+        cout << endl;
+
+        logsMessage = I->getInfo(input);
+
+        cout << endl;
+        string input1;
+        cout << "Type anything to continue: ";
+        cin >> input1;
+
+        currentOperation = "default";
+    }
+
+    void blacksmithMenu()
+    {
+        cout << "  Chose an operation you'd like to perform." << endl;
+        cout << "  1. Upgrade an item." << endl;
+        cout << "  2. Disassemble an item." << endl;
+        cout << "  3. Exit." << endl;
+
+        string input;
+        cout << "  Input: " << endl;
+        cin >> input;
+
+        if (input == "1")
+        {
+            logsMessage = "Upgrading!";
+            currentOperation = "upgrade";
+        }
+        else if (input == "2")
+        {
+            logsMessage = "Disassembling!";
+            currentOperation = "disassemble";
+        }
+        else if (input == "3")
+        {
+            logsMessage = "Blacksmith exited.";
+            currentOperation = "default";
+        }
+        else
+        {
+            logsMessage = "Nonexistent input! Try again.";
+            currentOperation = "blacksmith";
+        }
+    }
+
+    void upgradeMenu()
+    {
+        inventoryDisplay();
+
+        string input;
+        cout << "Select an item to upgrade: ";
+        cin >> input;
+
+
+
+        currentOperation = "blacksmith";
+    }
+    void disassembleMenu()
+    {
+
+    }
+
+    void expedition_loop()
+    {
+        string skipper;
+
+        bool game_end = false;
+        bool game_won;
+
+        Enemy enemy = generate_enemy();
+
+        int enemy_hp = enemy.return_hp();
+        int enemy_damage = enemy.return_dmg();
+        int enemy_defence = enemy.return_defence();
+        string enemy_name = enemy.return_name();
+        string enemy_introduction = enemy.return_introduction();
+        string enemy_win_message = enemy.return_win_message();
+        string enemy_loose_message = enemy.return_loose_message();
+
+        int player_hp;
+        int player_dmg;
+        int player_defence;
+
+        cout << enemy_name << ": " << enemy_introduction << endl;
+        cout << "Type anything to continue: ";
+        cin >> skipper;
+        cout << endl;
+
+        while(!game_end)
+        {
+            string message;
+            string option_attack;
+
+
+            cout << "Enemy stats:" << endl;
+            cout << "Enemy name: " << enemy_name << endl;
+            cout << "Enemy hp: " << enemy_hp << endl << endl;
+
+            cout << "Player stats:" << endl;
+            cout << "Player hp: " << player_hp << endl << endl;
+
+
+            cout << "Choose one option:" << endl;
+            cout << "1. Attack" << endl;
+            cout << "2. Defend" << endl;
+            cout << "Your option: ";
+            cin >> option_attack;
+            cout << endl;
+
+
+            int enemy_attack = time(0) % 2; //enemy attack = 0 is for enemy attack and e... = 1 is for defence :)
+
+            if(option_attack[0] == 'A' || option_attack[0] == 'a' || option_attack[0] == '1') //place holder just for now. later it will be replaced for wsad movement //you replace it with your option thingy later
+            {
+                string skipper;
+
+                cout << "You chose attack!" << endl;
+                cout << "Type anything to continue: ";
+                cin >> skipper;
+                cout << endl;
+
+                if(enemy_attack == 0)
                 {
-                    cout << "[ ]   ";
+                    cout << enemy_name <<" chose attack!" << endl;
+                    cout << "Type anything to continue: ";
+                    cin >> skipper;
+                    cout << endl;
                 }
-                else
+                else if(enemy_attack == 1)
                 {
-                    cout << "[" << tab[i][j]->display_name << "]   ";
+                    cout << enemy_name <<" chose defend!" << endl;
+                    cout << "Type anything to continue: ";
+                    cin >> skipper;
+                    cout << endl;
+                }
+
+                int damage_to_enemy = player_dmg - enemy_defence;
+                if(damage_to_enemy < 0 && enemy_attack == 0) //if defence bigger than attack from player
+                {
+                    enemy_hp--;
+                    message = enemy_name + " took only 1 hp of damage because of its huge defence";
+                }
+                else if(damage_to_enemy < 0 && enemy_attack == 1) //if enemy has huge defence and it chose defend
+                {
+                    message = enemy_name + " defended the attack!";
+                }
+                else if(enemy_attack == 0)
+                {
+                    enemy_hp = enemy_hp - damage_to_enemy;
+                    message = "You have landed a perfect attack!";
+                }
+                else if(enemy_attack == 1)
+                {
+                    enemy_hp = enemy_hp - (damage_to_enemy / 2);
+                    message = enemy_name + " takes half of the damage!";
+                }
+
+                int damage_to_player = enemy_damage - player_defence;
+                if(damage_to_player <= 0 && enemy_attack == 0)
+                {
+                    player_hp--;
+                    message = "You took only 1 hp of damage because of your huge defence";
+                }
+                else if(damage_to_player > 0 && enemy_attack == 0)
+                {
+                    player_hp = player_hp - damage_to_player;
+                    message = enemy_name + " landed a perfect attack!";
+                }
+
+                show_message(message);
+                //logsMessage = message;
+
+
+
+            }
+            else if(option_attack[0] == 'D' || option_attack[0] == 'd' || option_attack[0] == '2')  //place holder just for now. later it will be replaced for wsad movement // same as above :)
+            {
+                int damage_to_player = enemy_damage - player_defence;
+                if(damage_to_player <= 0 && enemy_attack == 0)
+                {
+                    message = "You have defended the attack!";
+                }
+                else if(damage_to_player > 0 && enemy_attack == 0)
+                {
+                    player_hp = player_hp - (damage_to_player / 2);
+                    message = "You take half of the damage!";
+                }
+                else if(enemy_attack == 1)
+                {
+                    message = "Bough you and enemy used defend!";
                 }
             }
+            else {
+                cout << "Wrong input! Type attack or defence or their corresponding numers!" << endl;
+            }
+            show_message(message);
+            //logsMessage = message;
+            if(player_hp <= 0)
+            {
+                game_end = true;
+                game_won = false;
+            }
+            else if(enemy_hp <= 0)
+            {
+                game_end = true;
+                game_won = true;
+            }
+        }
+
+        if(game_won == true)
+        {
+            string skipper;
+            show_message("You have won!");
+            //logsMessage = "You have won!";
+            cout << "Type anything to continue: ";
+            cin >> skipper;
             cout << endl;
         }
-        cout << "X  ";
-        for(int a = 0; a < 6; a++) // a because of armor
+        else
         {
-            if(battle_slots[a]->name == "NAN")
-            {
-                cout << "{ }   ";
-            }
-            else
-            {
-                cout << "{" << battle_slots[a]->display_name << "}   ";
-            }
+            string skipper;
+            show_message("You have lost!");
+            //logsMessage = "You have lost!";
         }
+    }
+
+    Enemy generate_enemy() //Generates random enemy. Hopefuly
+    {
+        vector<Enemy> enemy_list; //Used vector so we wont have any issues with that annoying vector isnt used thing
+
+
+        //Enemy things stats ect go like that: name, hp, dmg, defence, introduction, win monolog, loose monolog
+        enemy_list[0] = Enemy("Goblin", 11, 6, 2, "I'll rob ya from ya gold. YAHAHAHA", "Got ya soul and gold. AHAHAHAHAHA", "Nooo!. I just want some shiny coins :(");
+        enemy_list[1] = Enemy("Ogre", 120, 30, 9, "Me Org the Gog! Me smash small human to puddle", "Orge did what he said he would do", "NOOO! Org not loose gore win! NOOOOOO!");
+        enemy_list[2] = Enemy("Walter", 1000, 50, 30, "Chemistry is the studdy of matter, but I prefer to see it as the study of change.", "Rememer to wear a respirator when cooking :3", "I am proud of you! You can cook now, all by yourself!"); //:). I had to do it
+        enemy_list[3] = Enemy("Sigma", 1, 1, 1, "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", ":(");
+        enemy_list[4] = Enemy("Elf", 50, 20, 5, "I will pierce you with my bow and arrow, and then I will finish you with my sword", "You didn't even stand a chance. Poor you", "Impossible...");
+        enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zord did what he said he would do");
+        enemy_list[6] = Enemy("Barbarrian", 60, 40, 2, "I will make you into thin slices with my swords", "Barbarrian has cut you into chips", "How did you even.. NOOOOOOOO");
+        enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME");
+        enemy_list[8] = Enemy("Mage", 6, 100, 0, "FIREBALL", "HAHAHAHAHA! FIREBALL! FIREBALL! F I R E B A L L", "Died 1d4 Introverted"); //Died of emotional damage 💀
+        enemy_list[9] = Enemy("Spider", 20, 30, 2, "SSSSKASKKAS *translating: Can I bite you pls? It wont hurt that much :3*", "SKASSA SAKA *translating: Told ya it wont hurt that much. Anywas youll be a tasty snack :3*");
+        enemy_list[10] = Enemy("Queen spider", 100, 6, 10, "GET OUT OF MY LAND YOU LITTLE PESSANT!", "SHOULDNT HAVE CAME HERE IN THE FRIST PLACE. NOW LOOK AT YOU! ALL BROKEN AND SMASHED TO THE GROUND", "IMPOSSIBLE! KILLED BY A PESSANT! NOOOOOOOO!");
+        enemy_list[11] = Enemy("Greg", 150, 30, 17, "Hi my name is Greg!", "That was a nice battle! Hope there is a cleric nearby.", "Well... Thought i couldn't be beaten. But here we are");
+        enemy_list[12] = Enemy("Gnome", 10, 3, 1, "OOH!", "YAHOOOO", ":(");
+        enemy_list[13] = Enemy("Executioneer", 120, 34, 7, "Can you place your head on that stand, please. It won't hurt", "Tank you for listening *cuts your head off*", "WHY ARENT YOU LISTENING TO ME *Impales himself on his axe*");
+        enemy_list[14] = Enemy("Miner", 65, 15, 4, "I was strong back in my days. But the coal dust made me weak.", "Thought i would be dead. But I was wrong", "Finally peace! Thank you");
+        enemy_list[15] = Enemy("Archer", 50, 50, 0, "Meet my bow and arrow! With them you will have a huge hole in your forhead", "360 NOSCOPE HEADSHOT", "*You dodged his arrow* Whelp good game");
+        enemy_list[16] = Enemy("Hunter", 130, 39, 16, "You are my pray! This will be an easy fight", "You will do as a nice decoration to my wall", "NOOOO! PlEaSe DoN't KiiL mE!");
+        enemy_list[17] = Enemy("Bear", 250, 35, 17, "ROOAR *translation: LEAVE MY KIDS ALONE!*", "ROAAR *translation: THATS WHAT YOU GET FOR GETTING CLOSE TO MY KIDS*", "roar? *translation: Who will protect my little brarcubs now?*");
+        enemy_list[18] = Enemy("Mugger", 110, 15, 9, "I will mugg ya", "HA HA MUGGED", ":( all I wanted is to mug you");
+        enemy_list[19] = Enemy("Priest", 210, 30, 10, "DO NOT CHALLAGNE THE REALITY OF CHRISTIANITY", "CHRISTIANY RULES YOU HERETIC", "WHA... BUT ALL I DID IS ROB POOR PEOPLE");
+        enemy_list[20] = Enemy("Hooligan", 70, 10, 3, "What will you do. CrY oN Me? AHHAHAAHAHAH", "PlEaSe DoNt hUrTmE! AHAHAHAA EASY YOU LITTLE PESANT", "WWWWAAAAAAAA! I SHOULD ONLY WIN! HOOOW! WAAAAAAAA!");
+        enemy_list[21] = Enemy("Genious", 200, 20, 13, "The apple falls because of GRAVITY", "If you punch something, the same force is acting against you. Remember it for our next battle.", "I can't figure out how stocks work :(. Im broke now :("); //The Isac Newton accoualy got broke because of stocks. XD
+        enemy_list[22] = Enemy("Blacksmith", 210, 40, 20, "Punching iron for 10 years makes you superbuff.", "OOOPS! I didn't mean to punch off the head from you.", "Bravo! Didn't expect such great battle from you");
+        enemy_list[23] = Enemy("Left handed", 300, 38, 17, "Left hand is the superior one", "Nothing beats left hand", "WAIT! YOU CAN FIGHT WITH TWO HANDS! Bye!");
+        enemy_list[24] = Enemy("King", 300, 30, 20, "I was the best knight in the whole kingdom. So i politely took the throne", "Knew you couldn't stand the king himself", "Impossible... HOW DID YOU BEAT ME!");
+        enemy_list[25] = Enemy("Knight", 200, 25, 13, "I am loyal to the king. The best of knights", "Didn't even try", "You are worthy of the fight with the KING!");
+        enemy_list[26] = Enemy("Cleric", 50, 10, 7, "I exist just to heal! Not to fight", "Whaa... Impossible! I, I HAVE WON!", "Yea, just kill me. I didn't even stand a chance.");
+        enemy_list[27] = Enemy("Wolf", 130, 20, 25, "WOOF! *translating: You will be a tasty snack!*", "AUUUUU! *translating: Letss gooo!/That was easy!*", "wof? *translating: how?*"); //Huge defence because of its agility
+        enemy_list[28] = Enemy("Predator", 400, 60, 40, "*Breaks a stick*", "Collects your skull. Because it was a worthy fight", "*Has a hart attack from your Intimidation*");
+        enemy_list[29] = Enemy("AMOGUS", 150, 25, 12, "AMOGUS! *translating: PREPRARE FOR DOOM!*", "A... AMOGUS! *translating: YES!... I HAVE WON!/I AM VICRORIOUS*", "amogus. *translating: You were an opponent worthy of fighting*"); //Had a blast of inspiration :3
+        enemy_list[30] = Enemy("THE GREAT MOGUS AMOGUS", 300, 49, 21, "AAAAAMMMOOOOGGGGUS! *translating: YOU THINK YOU CAN CHALLANGE ME? THE GREAT MOGUS AMOGUS? THINK TWICE ABOUT THAT!*", "Amogus. *translating: Why you just didn't give up earlier. I wouldn't hurt that much*", "A... MOGUS? *translating: WHAT!.. HOW DID THAT HAPPEN?*");
+        enemy_list[31] = Enemy("Impostor", 200, 30, 9, "AMONG US! *translating: I HAVE KILLED ALL OF MY CREW WITH OUT ANYONE NOTICING SO I WILL KILL YOU TOO!*", "AAMOGUS! *translating: I WILL STAY AND ALWAYS BE VICTORIOUS*", "MOGUS!? *translating: HOW DID YOU FIND A PORTAL TO THE OUTER SPACE!?*"); //Just after i started making this character amongus drip remix started playnig on spotify XDDDDDDDd
+        enemy_list[32] = Enemy("Chicken", 7, 2, 1, "POG! POG! POG! KPOOOOO! *translating: EAT! EAT! EAT! EEEEAAAAATTT!*", "POG POG POG *translating: EAT! EAT! EAT! (Im starting to wonder if that chicken knows any other words than eat)*", "POG! POG! POG! *translating: EAT! EAT! EAT!*");
+
+
+        Enemy enemy = enemy_list[time(0) % enemy_list.size()];
+        return enemy;
+    }
+
+    void show_message(string message) //With out my old code :(. Anyways it displays a message if you attacked or not ect i will make it look preatier later :) (the message)
+    {
+
+        cout << message << endl;
+
+    }
+
+    void dropMenu()
+    {
+        inventoryDisplay();
+
+        cout << endl << "  Enter coordinate to delete." << endl;
+
+        string cords;
+
+        cout << "  Delete an item: ";
+        cin >> cords;
+        cout << endl;
+
+        logsMessage = I->delete_an_item(cords);
+
+        currentOperation = "default";
+    }
+
+    void sortMenu()
+    {
+        // empty
+    }
+
+    void logsDisplay()
+    {
+        cout << "--------------------------------------------------------------------------------" << endl;
+        cout << "  " << logsMessage << endl;
+        cout << "--------------------------------------------------------------------------------" << endl;
+        cout << "\n";
+    }
+
+    void inventoryDisplay()
+    {
+        cout << endl << "  Inventory:" << endl;
+        I->display();
         cout << endl;
     }
-    void display_id() //Used for testing reasons (to show if the items are added corectly)
+
+    void clear()
     {
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                cout << "[" << tab[i][j]->id << "]  ";
-            }
-            cout << endl;
-        }
+#ifdef PLATFORM_WINDOWS
+        system("cls");
+#elif defined(PLATFORM_MACOS)
+        system("clear");
+#else
+#endif
     }
 
-    void add_item_test(int row_cords, int col_cords) //This code adds temprorary items to the inventory
+    ~Game()
     {
-        tab[row_cords - 1][col_cords - 1] = new Item(11, "babab");
-    }
-
-    int translate_rows(char letter) //This code is used to translade A B inputs to letters
-    {
-        for(int i = 0; i < letters.size(); i++)
-        {
-            if(letters[i] == letter)
-            {
-                return i + 1;
-            }
-        }
-        return -1;
-    }
-
-    void swap_item(char row_cords1, int col_cords1, char row_cords2, int col_cords2) //I am using rows1 ect to make my brain visualate the code
-    {
-        char row_cords1_upper = toupper(row_cords1); //making inputs uppercase because the display board (letters string) is made of capital letters
-        char row_cords2_upper = toupper(row_cords2);
-
-        int row_trans1 = translate_rows(row_cords1_upper); //translating A, B to numbers so it would be 1, 2
-        int row_trans2 = translate_rows(row_cords2_upper);
-
-        int col_cords1_smol = col_cords1 - 1;
-        int col_cords2_smol = col_cords2 - 1;
-
-        int* free_spot = find_smallest_free_spot();
-
-
-        string* slot_type_list = new string[7];
-        slot_type_list[0] = "helmet";
-        slot_type_list[1] = "chestplate";
-        slot_type_list[2] = "leggings";
-        slot_type_list[3] = "boots";
-        slot_type_list[4] = "weapon";
-        slot_type_list[5] = "shield";
-        slot_type_list[6] = "general";
-
-        //cout<<"GOT HERE1" << endl;
-
-        if(((row_trans1 == -1) && (row_cords1_upper != 'X')) || ((row_trans2 == -1) && (row_cords2_upper != 'X')))
-        {
-            cout << "Incorrect row value! You should enter cordinates like in chess for example: a1, b3" << endl;
-
-        }
-
-        else if((row_cords1_upper == 'X') && (row_cords2_upper == 'X'))
-        {
-            cout << "YOU CAN NOT SWAP ITEMS IN THIS INVENTORY" << endl;
-
-        }
-        //cout<<"GOT HERE2" << endl;
-        else if(row_cords1_upper == 'X')
-        {
-            if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "helmet") && (slot_type_list[col_cords1 - 1] == "helmet"))
-            {
-                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-            }
-            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "chestplate") && (slot_type_list[col_cords1 - 1] == "chestplate"))
-            {
-                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-            }
-            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "leggings") && (slot_type_list[col_cords1 - 1] == "leggings"))
-            {
-                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-            }
-            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "boots") && (slot_type_list[col_cords1 - 1] == "boots"))
-            {
-                swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-            }
-            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "weapon") && (slot_type_list[col_cords1 - 1] == "weapon"))
-            {
-
-
-                if(tab[row_trans2 - 1][col_cords2 - 1]->item_type == "axe")
-                {
-                    int* free_spot = find_smallest_free_spot();
-
-
-                    if((free_spot[0] == -1) || (free_spot[1] == -1))
-                    {
-                        cout << "INVENTORY IS FULL CAN NOT SWAP ITEM AXE WITH SHIELD" << endl;
-
-                    }
-                    else
-                    {
-                        swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-                        swap(battle_slots[5], tab[free_spot[0]][free_spot[1]]);                    //DONT LISTEN TO POTETNIAL MEMORY LEAKS
-
-                    }
-                }
-                else
-                {
-                    swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-
-                }
-
-            }
-            else if((tab[row_trans2 - 1][col_cords2 - 1]->slot_type == "shield") && (slot_type_list[col_cords1 - 1] == "shield"))
-            {
-                if(battle_slots[4]->item_type == "axe")
-                {
-                    cout << "CANNOT SWAP ITEMS. AXE IS EQUIPED" << endl;
-                }
-                else
-                {
-                    swap(battle_slots[col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]);
-                }
-            }
-            else
-            {
-                cout << "CANNOT SWAP ITEMS. WRONG ITEM TYPE" << endl;
-
-            }
-        }
-        //cout<<"GOT HERE3" << endl;
-        else if(row_cords2_upper == 'X')
-        {
-            //cout<<"GOT HERE11" << endl;
-            if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "helmet") && (slot_type_list[col_cords2 - 1] == "helmet"))  // this part crashes my program HERE
-            {
-                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-            }
-            //cout<<"GOT HERE12" << endl;
-            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "chestplate") && (slot_type_list[col_cords2 - 1] == "chestplate"))
-            {
-                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-            }
-            //cout<<"GOT HERE13" << endl;
-            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "leggings") && (slot_type_list[col_cords2 - 1] == "leggings"))
-            {
-                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-            }
-            //cout<<"GOT HERE14" << endl;
-            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "boots") && (slot_type_list[col_cords2 - 1] == "boots"))
-            {
-                swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-            }
-            //cout<<"GOT HERE15" << endl;
-            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == "weapon") && (slot_type_list[col_cords2 - 1] == "weapon"))
-            {
-
-                if(tab[row_trans1 - 1][col_cords1 - 1]->item_type == "axe")
-                {
-
-                    if((free_spot[0] == -1) || (free_spot[1] == -1))
-                    {
-                        cout << "INVENTORY IS FULL CAN NOT SWAP ITEM" << endl;
-
-                    }
-                    else
-                    {
-                        swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-                        swap(battle_slots[5], tab[free_spot[0]][free_spot[1]]);                 //DONT LISTEN TO POTETNIAL MEMORY LEAKS
-
-                    }
-                }
-                else
-                {
-                    //cout<<"GOT HERE6" << endl;
-                    swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-                    //cout<<"GOT HERE7" << endl;
-                }
-            }
-            //cout<<"GOT HERE16" << endl;
-            if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == slot_type_list[5]) && (slot_type_list[col_cords2 - 1] == slot_type_list[5]))
-            {
-                if(battle_slots[4]->item_type == "axe")
-                {
-                    cout << "CANNOT SWAP ITEMS. AXE IS EQUIPED" << endl;
-                }
-                else
-                {
-                    swap(tab[row_trans1 - 1][col_cords1 - 1], battle_slots[col_cords2 - 1]);
-                }
-            }
-            else if((tab[row_trans1 - 1][col_cords1 - 1]->slot_type == slot_type_list[6]))
-            {
-                cout << "CANNOT SWAP ITEMS. WRONG ITEM TYPE" << endl;
-
-
-            }
-        }
-        //cout<<"GOT HERE4" << endl;
-        else if((row_trans1 > rows) || (row_trans2 > rows))
-        {
-            cout << "Row input to big" << endl;
-
-        }
-        //cout<<"GOT HERE5" << endl;
-        else if((col_cords1 > cols) || (col_cords2 > cols))
-        {
-            cout << "Cols input to big" << endl;
-
-        }
-
-        else
-        {
-            swap(tab[row_trans1 - 1][col_cords1 - 1], tab[row_trans2 - 1][col_cords2 - 1]); // Almost forgot to swich the rows_cords to translated ones XDDD
-
-        }
-    }
-
-    int* find_smallest_free_spot()
-    {
-        int* cords = new int[2];
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                if(tab[i][j]->name == "NAN")
-                {
-                    cords[0] = i;
-                    cords[1] = j;
-                    return cords;
-                }
-            }
-        }
-        cords[0] = -1;
-        cords[1] = -1;
-        return cords;
-    }
-    //had to add id because i had to :(
-    void add_specific_item(int id = 0, string name = "NAN", string display_name = "!", string item_type = "general", string slot_type = "NAN", int base_damage = 0, int base_defence = 0, string quality = "normal", int amount = 1, int durability = 10, string trait1 = "NAN", string trait2 = "NAN", string trait3 = "NAN", string trait4 = "NAN")
-    {
-        int* smallest_item = find_smallest_free_spot();
-        if(smallest_item[0] == -1 or smallest_item[1] == -1) //its the same as free spot ealier
-        {
-            cout << "INVENTORY IS FULL! ITEM LOST!" << endl;
-        }
-        else
-        {
-            tab[smallest_item[0]][smallest_item[1]]  = new Item(11, name, display_name, item_type, slot_type, base_damage, base_defence, quality, amount, durability, trait1, trait2, trait3, trait4);
-        }
-    }
-
-    void add_random_item()
-    {
-        int* smallest_item = find_smallest_free_spot();
-        if(smallest_item[0] == -1 or smallest_item[1] == -1) //its the same as free spot ealier
-        {
-            cout << "INVENTORY IS FULL! ITEM LOST!" << endl;
-        }
-        else
-        {
-
-            //random_device rd; //this code creates random engine
-            //mt19937 gen(rd());  // Mersenne Twister pseudo-random generator
-
-
-            //uniform_int_distribution<> dis(1, 100);
-            //int id = arc4random % 101 //id doesnt work :(
-            string* names_list;
-            string* display_names_list;
-            string* slot_type_list;
-            int truethful = 0; //Always tells truth
-
-
-            //item name
-            names_list = new string[11]; //IM SO STUPID I ENTERED HERE 10 INSTEAD OF 11 XXDDDDD
-
-            names_list[0] = "THE LEGENDARY AXOMOGON SWORD";
-            names_list[1] = "ICE BREAKER";
-            names_list[2] = "MONEY";
-            names_list[3] = "NOKIA 3310 ON A STICK";
-            names_list[4] = "Jacek";
-            names_list[5] = "ROBHERTHUS"; // aka bob
-            names_list[6] = "Amoonguss";
-            names_list[7] = "BIG BERTHA";
-            names_list[8] = "Mieczyk";
-            names_list[9] = "EIKMANANAB";
-            names_list[10] = "GIANT TOTINO"; // i sencerly apologise for these names
-
-
-
-            string name = names_list[arc4random() % 11];
-
-
-            //display names
-            display_names_list = new string[6]; //SAME HERE LMAOOO
-            display_names_list[0] = "!";
-            display_names_list[1] = "P";
-            display_names_list[2] = "S";
-            display_names_list[3] = "K";
-            display_names_list[4] = "R";
-            display_names_list[5] = "U";
-
-
-
-            string display_name = display_names_list[arc4random() % 6];
-
-            //slot types
-            slot_type_list = new string[7];
-            slot_type_list[0] = "general";
-            slot_type_list[1] = "weapon";
-            slot_type_list[2] = "helmet";
-            slot_type_list[3] = "chestplate";
-            slot_type_list[4] = "leggings";
-            slot_type_list[5] = "boots";
-            slot_type_list[6] = "shield";
-
-
-
-            string slot_type = slot_type_list[arc4random() % 7];
-
-            //item types
-            string item_type;
-            string* item_type_list;
-
-            if(slot_type == "weapon")
-            {
-                item_type_list = new string[2];
-                item_type_list[0] = "axe";
-                item_type_list[1] = "sword";
-
-                item_type = item_type_list[arc4random() % 2];
-            }
-            else if(slot_type == "shield")
-            {
-                item_type = "shield";
-            }
-            else if(slot_type == "helmet")
-            {
-                item_type = "helmet";
-            }
-            else if(slot_type == "chestplate")
-            {
-                item_type = "chestplate";
-            }
-            else if(slot_type == "leggings")
-            {
-                item_type = "leggings";
-            }
-            else if(slot_type == "boots")
-            {
-                item_type = "boots";
-            }
-            else
-            {
-                item_type = "NAN";
-            }
-
-            int base_damage = 0;
-            int base_defence = 0;
-
-            if(slot_type == "weapon")
-            {
-                base_damage = arc4random() % 21;
-
-            }
-            else if(slot_type != "NAN" and slot_type != "weapon")
-            {
-                base_defence = arc4random() % 21;
-            }
-
-
-            string quality;
-            string* quality_list;
-            quality_list = new string[6];
-            quality_list[0] = "normal";
-            quality_list[1] = "common";
-            quality_list[2] = "uncommon";
-            quality_list[3] = "rare";
-            quality_list[4] = "epic";
-            quality_list[5] = "legendary";
-
-
-
-            int rarity = arc4random() % 101;
-            if(rarity > 0 and rarity <= 20)
-            {
-                quality = quality_list[0];
-            }
-            else if(rarity > 20 and rarity <= 35)
-            {
-                quality = quality_list[1];
-            }
-            else if(rarity > 35 and rarity <= 50)
-            {
-                quality = quality_list[2];
-            }
-            else if(rarity > 50 and rarity <= 75)
-            {
-                quality = quality_list[3];
-            }
-            else if(rarity > 75 and rarity <= 90)
-            {
-                quality = quality_list[4];
-            }
-            else if(rarity > 90 and rarity <= 100)
-            {
-                quality = quality_list[5];
-            }
-
-            int amount = 1;
-
-            int durability = 10 + (arc4random() % 51);
-
-            string* trait_list;
-            trait_list = new string[16];
-            trait_list[0] = "destroyed";
-            trait_list[1] = "blunt";
-            trait_list[2] = "jagged edge";
-            trait_list[3] = "sharp";
-            trait_list[4] = "damascus steel";
-            trait_list[5] = "perfectly balanced"; //spiffing brit refrence XD
-            trait_list[6] = "tuff";
-            trait_list[7] = "heavy";
-            trait_list[8] = "badly forged";
-            trait_list[9] = "light";
-            trait_list[10] = "bad materials";
-            trait_list[11] = "uncomfortable handle";
-            trait_list[12] = "AMONGUS";
-            trait_list[13] = "flaming edge";
-            trait_list[14] = "made in china";
-            trait_list[15] = "rusty";
-
-            int traits_random_num1 = arc4random() % 101;
-            int traits_random_num2 = arc4random() % 101;
-            int traits_random_num3= arc4random() % 101;
-            int traits_random_num4 = arc4random() % 101;
-            string trait1 = "NAN";
-            string trait2 = "NAN";
-            string trait3 = "NAN";
-            string trait4 = "NAN";
-
-            if(traits_random_num1 == 14 or traits_random_num1 == 71 or traits_random_num1 == 33)
-            {
-                trait1 = trait_list[arc4random() % 16];
-            }
-            if(traits_random_num2 == 4 or traits_random_num2 == 20 or traits_random_num2 == 69)
-            {
-                trait2 = trait_list[arc4random() % 16];
-            }
-            if(traits_random_num3 == 98 or traits_random_num3 == 43 or traits_random_num3 == 34)
-            {
-                trait3 = trait_list[arc4random() % 16];
-            }
-            if(traits_random_num4 == 8 or traits_random_num4 == 16 or traits_random_num4 == 32)
-            {
-                trait4 = trait_list[arc4random() % 16];
-            }
-
-
-
-            int id = arc4random() % 101;
-
-
-
-            tab[smallest_item[0]][smallest_item[1]] = new Item(id, name, display_name, item_type, slot_type, base_damage, base_defence, quality, amount, durability, trait1, trait2, trait3, trait4);
-
-        }
-
-    }
-
-    bool has_traits_battle(int col_cords)
-    {
-        for(int i = 0; i < 4; i++)
-        {
-            if(battle_slots[col_cords]->traits[i] != "NAN")
-                return true;
-        }
-        return false;
-    }
-
-    bool has_traits_tab(int row_cords, int col_cords)
-    {
-        for(int i = 0; i < 4; i++)
-        {
-            if(tab[row_cords][col_cords]->traits[i] != "NAN")
-                return true;
-        }
-        return false;
-    }
-
-    void show_stats(char row_cords, int col_cords)
-    {
-        cout << "-----------------------------" << endl;
-        cout << "Item stats:" << endl;
-        char row_cords_upper = toupper(row_cords);
-
-        int row_trans = translate_rows(row_cords_upper);
-
-        if(row_trans == -1)
-        {
-            cout << "Incorrect row value! You should enter cordinates like in chess for example: a1, b3" << endl;
-        }
-        else if(row_trans > rows)
-        {
-            cout << "Row input to big" << endl;
-        }
-        else if(col_cords > cols)
-        {
-            cout << "Cols input to big" << endl;
-        }
-        else if(row_cords_upper == 'X')
-        {
-            col_cords = col_cords - 1;
-            if(battle_slots[col_cords]->name == "NAN")
-            {
-                cout << "ITS AN EMPTY SLOT" << endl;
-            }
-            else
-            {
-                cout << "Name: " << battle_slots[col_cords]->name << endl;
-            }
-            cout << "Item type: " << battle_slots[col_cords]->item_type << endl;
-            if(battle_slots[col_cords]->slot_type != "NAN")
-            {
-                cout << "Slot type: " << battle_slots[col_cords]->slot_type << endl;
-            }
-            if(battle_slots[col_cords]->base_damage != 0)
-            {
-                cout << "Base damage: " << battle_slots[col_cords]->base_damage << endl;
-            }
-            if(battle_slots[col_cords]->base_defence != 0)
-            {
-                cout << "Base defence: " << battle_slots[col_cords]->base_defence << endl;
-            }
-            if(battle_slots[col_cords]->quality != "normal")
-            {
-                cout << "Quality: " << battle_slots[col_cords]->quality << endl;
-            }
-            cout << "Durability: " << battle_slots[col_cords]->durability << endl;
-
-            if(has_traits_battle(col_cords))
-            {
-                cout << "Traits:" << endl;
-                int adder = 1;
-                for(int i = 0; i < 4; i++)
-                {
-                    if(battle_slots[col_cords]->traits[i] != "NAN")
-                    {
-                        cout << adder << " trait: " << battle_slots[col_cords]->traits[i] << endl;
-                        adder++;
-                    }
-                }
-            }
-        }
-        else
-        {
-            row_trans = row_trans - 1;
-            col_cords = col_cords - 1;
-
-            if(tab[row_trans][col_cords]->name == "NAN")
-            {
-                cout << "ITS AN EMPTY SLOT" << endl;
-            }
-            else
-            {
-                cout << "Name: " << tab[row_trans][col_cords]->name << endl;
-
-                cout << "Item type: " << tab[row_trans][col_cords]->item_type << endl;
-                if(tab[row_trans][col_cords]->slot_type != "NAN")
-                {
-                    cout << "Slot type: " << tab[row_trans][col_cords]->slot_type << endl;
-                }
-                if(tab[row_trans][col_cords]->base_damage != 0)
-                {
-                    cout << "Base damage: " << tab[row_trans][col_cords]->base_damage << endl;
-                }
-                if(tab[row_trans][col_cords]->base_defence != 0)
-                {
-                    cout << "Base defence: " << tab[row_trans][col_cords]->base_defence << endl;
-                }
-                if(tab[row_trans][col_cords]->quality != "normal")
-                {
-                    cout << "Quality: " << tab[row_trans][col_cords]->quality << endl;
-                }
-                cout << "Durability: " << tab[row_trans][col_cords]->durability << endl;
-
-                if(has_traits_tab(row_trans, col_cords))
-                {
-                    cout << "Traits:" << endl;
-                    int adder = 1;
-                    for(int i = 0; i < 4; i++)
-                    {
-                        if(tab[row_trans][col_cords]->traits[i] != "NAN")
-                        {
-                            cout << adder << " trait: " << tab[row_trans][col_cords]->traits[i] << endl;
-                            adder++;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-    }
-
-    void force_swap()
-    {
-        auto temp = tab[0][4];
-        tab[0][4] = battle_slots[4];
-        battle_slots[4] = temp;
+        delete I;
     }
 };
-
 
 int main()
 {
-    //auto sth = new Inventory(); //forgot how to do classes properly :skull:
-    //sth->display_name();
-    Inventory something(4, 9); //Create inventory
 
-    something.add_item_test(2, 6); //Adding test item (Yea with these old cords)
-    something.display_name();
+    Game game;
 
+    //game.gameDisplay();
+    game.run();
 
+    Inventory I;
+    Items It;
 
-    something.swap_item('B', 6, 'C', 6); //Apparently '' and "" has a difference the '' is used for chars and "" is used for string XD
-    something.swap_item('C', 6, 'a', 1);
+    //    I.add_item(2, 4, It.getRandomItem());
+    //    I.add_item(4, 1, It.getRandomItem());
+    //    I.add_item(3, 8, It.getRandomItem());
+    //    I.add_item(1, 4, It.getRandomItem());
+    //    I.add_gear_to_main(1, 1, Boots("", "B"));
+    //    I.add_gear_to_main(1, 6, Weapon("Sigma", "W")); //UUU sigma
 
-    something.add_random_item();
-    something.add_random_item();
+    //    cout << I.swap_items("A1", "#4") << endl;
 
-    something.add_specific_item(0,"something", "U", "shield", "shield");
-    something.add_specific_item(0,"something", "F", "axe", "weapon");
-    something.display_name();
+    //    I.display();
 
-    something.swap_item('A', 4, 'X', 6); //its crashing when im trying to execute this command (fixed)
-    something.display_name();
-    something.swap_item('a', 5, 'x', 5);
-    something.display_name();
-    something.swap_item('a', 4, 'x', 6);
-
-    //something.force_swap();
-
-    something.display_name();
-    something.show_stats('A', 3);
+    //    I.getInfo("D1");
 
     return 0;
 }
