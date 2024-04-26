@@ -52,7 +52,7 @@ public:
         }
         return Rarity();
     }
-/*
+    /*
     template<typename T>
     void applyRarity(T* item)
     {

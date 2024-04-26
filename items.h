@@ -107,7 +107,7 @@ public:
 
     Shield getRandomItem()
     {
-       return shield_list[getRandomIndex()];
+        return shield_list[getRandomIndex()];
     }
 };
 
