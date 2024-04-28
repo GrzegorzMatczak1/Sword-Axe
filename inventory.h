@@ -49,10 +49,6 @@ public:
     // adds an item to the inventory // user won't be able to specify where the items will be added because he sohouldn't be able to
     void add_item(int row_cords, int col_cords, const Item& itemToAdd);
 
-
-    void add_gear_to_main(int row_cords, int col_cords, const Gear& gearToAdd);
-
-
     // returns processed cord
     auto get_processed_cords(string cords) -> vector<int>;
 
@@ -72,7 +68,7 @@ public:
     vector<int> getFirstEmptySlot();
 
 
-    string upgradeAnItem(string cords);
+    string upgradeAnItem(string cords, int* playerGold);
 
 
     string disassembleAnItem(string cords);
