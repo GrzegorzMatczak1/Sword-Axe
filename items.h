@@ -46,7 +46,7 @@ public:
 class Weapons
 {
 public:
-    vector<Weapon> weapon_list;
+    vector<Item> weapon_list;
     vector<Item> component_list;
 
     Weapons()
@@ -55,12 +55,12 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         weapon_list = {
-            Weapon("Sword", "S", "weapon", "Common", 50, 30, {component_list[2], component_list[4]}, 19),
-            Weapon("Axe", "A", "weapon", "Common", 50, 30, {component_list[0], component_list[1], component_list[3]}, 20),
-            Weapon("Mace", "M", "weapon", "Common", 50, 30, {component_list[0], component_list[2], component_list[3]}, 23),
-            Weapon("Spear", "S", "weapon", "Common", 50, 30, {component_list[4]}, 19),
-            Weapon("Dagger", "D", "weapon", "Common", 50, 30, {component_list[2]}, 17),
-            Weapon("Bat", "B", "weapon", "Common", 50, 30, {component_list[0], component_list[0]}, 20)
+            Item("Sword", "S", "weapon", "Common", 50, 30, {component_list[2], component_list[4]}, 19),
+            Item("Axe", "A", "weapon", "Common", 50, 30, {component_list[0], component_list[1], component_list[3]}, 20),
+            Item("Mace", "M", "weapon", "Common", 50, 30, {component_list[0], component_list[2], component_list[3]}, 23),
+            Item("Spear", "S", "weapon", "Common", 50, 30, {component_list[4]}, 19),
+            Item("Dagger", "D", "weapon", "Common", 50, 30, {component_list[2]}, 17),
+            Item("Bat", "B", "weapon", "Common", 50, 30, {component_list[0], component_list[0]}, 20)
         };
     }
 
@@ -72,7 +72,7 @@ public:
         return dis(gen);
     }
 
-    Weapon getRandomItem()
+    Item getRandomItem()
     {
         return weapon_list[getRandomIndex()];
     }
@@ -81,7 +81,7 @@ public:
 class Shields
 {
 public:
-    vector<Shield> shield_list;
+    vector<Item> shield_list;
     vector<Item> component_list;
 
     Shields()
@@ -90,9 +90,9 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         shield_list = {
-            Shield("Wooden Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[0], component_list[3]}, 5),
-            Shield("Reinforced Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[1], component_list[3]}, 10),
-            Shield("Iron Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[2], component_list[3]}, 15)
+            Item("Wooden Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[0], component_list[3]}, 0, 5),
+            Item("Reinforced Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[1], component_list[3]}, 0, 10),
+            Item("Iron Shield", "S", "shield", "Common", 50, 30, {component_list[0], component_list[2], component_list[3]}, 0, 15)
         };
     }
 
@@ -105,7 +105,7 @@ public:
     }
 
 
-    Shield getRandomItem()
+    Item getRandomItem()
     {
        return shield_list[getRandomIndex()];
     }
@@ -114,7 +114,7 @@ public:
 class Helmets
 {
 public:
-    vector<Helmet> helmet_list;
+    vector<Item> helmet_list;
     vector<Item> component_list;
 
     Helmets()
@@ -123,9 +123,9 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         helmet_list = {
-            Helmet("Leather Helmet", "H", "helmet", "Common", 50, 30, {component_list[5], component_list[3]}, 5),
-            Helmet("Reinforced Helmet", "H", "helmet", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 10),
-            Helmet("Iron Helmet", "H", "helmet", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 15)
+            Item("Leather Helmet", "H", "helmet", "Common", 50, 30, {component_list[5], component_list[3]}, 0, 5),
+            Item("Reinforced Helmet", "H", "helmet", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 0, 10),
+            Item("Iron Helmet", "H", "helmet", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 0, 15)
         };
     }
 
@@ -137,7 +137,7 @@ public:
         return dis(gen);
     }
 
-    Helmet getRandomItem()
+    Item getRandomItem()
     {
         return helmet_list[getRandomIndex()];
     }
@@ -146,7 +146,7 @@ public:
 class Chestplates
 {
 public:
-    vector<Chestplate> chestplate_list;
+    vector<Item> chestplate_list;
     vector<Item> component_list;
 
     Chestplates()
@@ -155,9 +155,9 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         chestplate_list = {
-            Chestplate("Leather Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[5], component_list[3]}, 5),
-            Chestplate("Reinforced Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 10),
-            Chestplate("Iron Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 15)
+            Item("Leather Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[5], component_list[3]}, 0, 5),
+            Item("Reinforced Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 0, 10),
+            Item("Iron Chestplate", "C", "chestplate", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 0, 15)
         };
     }
 
@@ -169,7 +169,7 @@ public:
         return dis(gen);
     }
 
-    Chestplate getRandomItem()
+    Item getRandomItem()
     {
         return chestplate_list[getRandomIndex()];
     }
@@ -178,7 +178,7 @@ public:
 class Legginses
 {
 public:
-    vector<Leggins> leggins_list;
+    vector<Item> leggins_list;
     vector<Item> component_list;
 
     Legginses()
@@ -187,9 +187,9 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         leggins_list = {
-            Leggins("Leather Leggins", "L", "leggins", "Common", 50, 30, {component_list[5], component_list[3]}, 5),
-            Leggins("Reinforced Leggins", "L", "leggins", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 10),
-            Leggins("Iron Leggins", "L", "leggins", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 15)
+            Item("Leather Leggins", "L", "leggins", "Common", 50, 30, {component_list[5], component_list[3]}, 0, 5),
+            Item("Reinforced Leggins", "L", "leggins", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 0, 10),
+            Item("Iron Leggins", "L", "leggins", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 0, 15)
         };
     }
 
@@ -201,7 +201,7 @@ public:
         return dis(gen);
     }
 
-    Leggins getRandomItem()
+    Item getRandomItem()
     {
         return leggins_list[getRandomIndex()];
     }
@@ -210,7 +210,7 @@ public:
 class Bootses
 {
 public:
-    vector<Boots> boots_list;
+    vector<Item> boots_list;
     vector<Item> component_list;
 
     Bootses()
@@ -219,9 +219,9 @@ public:
         component_list = I.getItems(); // 0 - wood, 1 - stone, 2 - metal, 3 - rope, 4 - stick, 5 - leather
 
         boots_list = {
-            Boots("Leather Boots", "B", "boots", "Common", 50, 30, {component_list[5], component_list[3]}, 5),
-            Boots("Reinforced Boots", "B", "boots", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 10),
-            Boots("Iron Boots", "B", "boots", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 15)
+            Item("Leather Boots", "B", "boots", "Common", 50, 30, {component_list[5], component_list[3]}, 0, 5),
+            Item("Reinforced Boots", "B", "boots", "Common", 50, 30, {component_list[5], component_list[3], component_list[2]}, 0, 10),
+            Item("Iron Boots", "B", "boots", "Common", 50, 30, {component_list[2], component_list[2], component_list[3]}, 0, 15)
         };
     }
 
@@ -233,7 +233,7 @@ public:
         return dis(gen);
     }
 
-    Boots getRandomItem()
+    Item getRandomItem()
     {
         return boots_list[getRandomIndex()];
     }
