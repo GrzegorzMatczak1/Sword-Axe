@@ -133,12 +133,6 @@ void Inventory::add_item(int row_cords, int col_cords, const Item& itemToAdd)
     tab[row_cords - 1][col_cords - 1] = new Item(itemToAdd);
 }
 
-void Inventory::add_gear_to_main(int row_cords, int col_cords, const Gear& gearToAdd)
-{
-    const Item* itemToAdd = dynamic_cast<const Item*>(&gearToAdd);
-    tab[row_cords - 1][col_cords - 1] = new Item(*itemToAdd);
-}
-
 auto Inventory::get_processed_cords(string cords) -> vector<int>
 {
     auto process_cords_row = [this](string cords) -> int
@@ -204,7 +198,7 @@ string Inventory::swap_items(string cords1, string cords2)
 
         auto successMessage = []() -> string
         {
-            return "Swap successful";
+            return "Swap successful.";
         };
 
         // if first input is in gear and second in main inventory
@@ -218,6 +212,7 @@ string Inventory::swap_items(string cords1, string cords2)
             {
                 if (first->slot_type == second->slot_type) // both are same gear
                 {
+
                     battle_slots[cords1_prc[1]] = second;
                     tab[cords2_prc[0]][cords2_prc[1]] = first;
 
@@ -424,26 +419,33 @@ string Inventory::getInfo(string cords)
 
         if (cords_prc[0] >= 0)
         {
-            item = tab[cords_prc[0]][cords_prc[1]];
+            if (tab[cords_prc[0]][cords_prc[1]] != nullptr)
+            {
+                item = tab[cords_prc[0]][cords_prc[1]];
+            }
+            else
+            {
+                return "The slot is empty!";
+            }
         }
         else if (cords_prc[0] == -1)
         {
-            item = battle_slots[cords_prc[1]];
+            if (battle_slots[cords_prc[1]] != nullptr)
+            {
+                item = battle_slots[cords_prc[1]];
+            }
+            else
+            {
+                return "The slot is empty!";
+            }
         }
         else
         {
-            item = nullptr;
+            return "Invalid input!";
         }
 
-        if (item != nullptr)
-        {
-            item->get_data();
-            return "Inspection successful!";
-        }
-        else
-        {
-            return "The slot is empty!";
-        }
+        item->get_data();
+        return "Inspection successful!";
 
     }
     else
@@ -464,16 +466,78 @@ vector<int> Inventory::getFirstEmptySlot()
     return {-1, -1}; // inventory full
 }
 
-string Inventory::upgradeAnItem(string cords)
+string Inventory::upgradeAnItem(string cords, int* playerGold)
 {
+    Rarities r;
+    vector<Rarity> rarities = r.rarities;
+
     if (is_valid_cords_input(cords) >= 0)
     {
-        return "";
+        vector<int> cords_prc = get_processed_cords(cords);
+
+        if (cords_prc[0] >= 0) // main eq
+        {
+            Item* item = tab[cords_prc[0]][cords_prc[1]];
+
+            if (item->rarity == "Legendary")
+            {
+                return "Max rarity. Can't upgrade.";
+            }
+
+            for (int i = 0; i < rarities.size(); i++)
+            {
+                if (rarities[i].name == item->rarity)
+                {
+                    int cost = rarities[i+1].cost;
+                    if (cost > *playerGold)
+                    {
+                        return "Cant afford!";
+                    }
+                    else
+                    {
+                        item->rarity = rarities[i+1].name;
+                        *playerGold -= cost;
+                        return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                    }
+                }
+            }
+            return "Undefined rarity.";
+        }
+
+        else if(cords_prc[0] == -1) // gear eq
+        {
+            Item* item = battle_slots[cords_prc[1]];
+
+            if (item->rarity == "Legendary")
+            {
+                return "Max rarity. Can't upgrade.";
+            }
+
+            for (int i = 0; i < rarities.size(); i++)
+            {
+                if (rarities[i].name == item->rarity)
+                {
+                    int cost = rarities[i+1].cost;
+                    if (cost > *playerGold)
+                    {
+                        return "Cant afford!";
+                    }
+                    else
+                    {
+                        item->rarity = rarities[i+1].name;
+                        *playerGold -= cost;
+                        return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                    }
+                }
+            }
+            return "Undefined rarity.";
+        }
     }
     else
     {
         return "Invalid input! Upgrade unsuccessful.";
     }
+    return "Hi!";
 }
 
 
