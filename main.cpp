@@ -19,6 +19,45 @@
 
 using namespace std;
 
+class Shop
+{
+public:
+    bool inShop;
+    vector<string> itemChoices;
+    Item*** shopItems;
+    int rows;
+    int cols;
+
+
+    Shop()
+    {
+        rows = 3;
+        cols = 5;
+        inShop = true;
+        itemChoices = {
+            "item", "weapon", "shield", "helmet", "chestplate", "leggins", "boots"
+        };
+    }
+
+    int getRandomIndex()
+    {
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, itemChoices.size() - 1);
+        return dis(gen);
+    }
+
+    void fillShopItems()
+    {
+
+    }
+
+    void shop()
+    {
+
+    }
+};
+
 class Game
 {
 public:
@@ -49,13 +88,17 @@ public:
         currentOperation = "default";
 
         Items It;
+        Weapons W;
+        Helmets H;
+        Shields S;
 
         I->add_item(2, 4, It.getRandomItem());
         I->add_item(4, 1, It.getRandomItem());
         I->add_item(3, 8, It.getRandomItem());
         I->add_item(1, 4, It.getRandomItem());
-        I->add_gear_to_main(1, 1, Boots("", "B"));
-        I->add_gear_to_main(1, 6, Weapon("", "W"));
+        I->add_item(1, 1, W.getRandomItem());
+        I->add_item(1, 6, H.getRandomItem());
+        I->add_item(3, 3, S.getRandomItem());
 
 
         typesOfOperations[Operations::Default] = "default"; // display main menu
@@ -214,7 +257,7 @@ public:
         inventoryDisplay();
 
         string input;
-        cout << "Select an item: ";
+        cout << "  Select an item: ";
         cin >> input;
 
         cout << endl;
@@ -223,7 +266,7 @@ public:
 
         cout << endl;
         string input1;
-        cout << "Type anything to continue: ";
+        cout << "  Type anything to continue: ";
         cin >> input1;
 
         currentOperation = "default";
@@ -231,13 +274,15 @@ public:
 
     void blacksmithMenu()
     {
+        inventoryDisplay();
+
         cout << "  Chose an operation you'd like to perform." << endl;
         cout << "  1. Upgrade an item." << endl;
         cout << "  2. Disassemble an item." << endl;
-        cout << "  3. Exit." << endl;
+        cout << "  3. Exit." << endl << endl;
 
         string input;
-        cout << "  Input: " << endl;
+        cout << "  Input: ";
         cin >> input;
 
         if (input == "1")
@@ -265,15 +310,23 @@ public:
     void upgradeMenu()
     {
         inventoryDisplay();
+        I->displayGold();
+
+        cout << endl << "  Costs:"  << endl;
+        cout << "  Common->Uncommon - 15" << endl;
+        cout << "  Uncommon->Rare - 25" << endl;
+        cout << "  Rare->Epic - 35" << endl;
+        cout << "  Common->Uncommon - 50" << endl << endl;
 
         string input;
-        cout << "Select an item to upgrade: ";
+        cout << "  Select an item to upgrade: ";
         cin >> input;
 
-
+        logsMessage = I->upgradeAnItem(input, &I->gold);
 
         currentOperation = "blacksmith";
     }
+
     void disassembleMenu()
     {
 
