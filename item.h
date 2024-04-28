@@ -4,124 +4,59 @@
 #include <vector>
 #include "rarity.h"
 
+
 using namespace std;
+
+
 
 class Item
 {
 public:
     string name;
     string display_name;
-    string item_type;
     string slot_type;
     string rarity;
     int price;
     int worth;
-
-    Item(string name = "", string display_name = "", string slot_type = "general", string rarity = "common", int price = 0, int worth = 0);
-
-    virtual void get_data() const;
-};
-
-class Gear : public Item
-{
-public:
     vector<Item> components;
-
-    Gear(string name = "", string display_name = "", string slot_type = "gear", string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {});
-};
-
-class Weapon : public Gear
-{
-public:
     int base_damage;
+    int base_defence;
+
     int actual_damage;
-    float crit_chance;
-
-    Weapon(string name = "", string display_name = "", string slot_type = "weapon",
-           string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_damage = 0)
-        : Gear(name, display_name, slot_type, rarity, price, worth, components),
-        base_damage(base_damage) {
-
-        Rarities r;
-
-        //r.applyRarity<Weapon>(this);
-    }
-
-    void get_data() const override;
-};
-
-class Shield : public Gear
-{
-public:
-    int base_defence;
     int actual_defence;
 
-    Shield(string name = "", string display_name = "", string slot_type = "shield",
-           string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Gear(name, display_name, slot_type, rarity, price, worth, components), base_defence(base_defence) {
 
+    Item(string name = "", string display_name = "", string slot_type = "general", string rarity = "Common", int price = 0, int worth = 0,
+         vector<Item> components = {}, int base_damage = 0, int base_defence = 0)
+        :  name{name}, display_name{display_name}, slot_type{slot_type}, rarity{rarity}, price{price}, worth{worth},
+        components(components), base_damage(base_damage), base_defence(base_defence)
+    {
+        applyToItem();
+    }
+
+    void get_data()
+    {
+        cout << "  Name: " << this->name << endl;
+        cout << "  Type: " << this->slot_type << endl;
+        cout << "  Rarity: " << this->rarity << endl;
+        cout << "  Worth: " << this->worth << endl;
+        if (slot_type == "weapon")
+        {
+            cout << "  Damage: " << this->actual_damage << endl;
+        }
+        else if (slot_type == "general") {}
+        else
+        {
+            cout << "  Defence: " << this->actual_defence << endl;
+        }
+    }
+
+    void applyToItem()
+    {
         Rarities r;
-
-        //r.applyRarity<Shield>(this);
+        r.applyRarity<Item>(this);
     }
 
-    void get_data() const override;
-};
-
-class Armor : public Gear
-{
-public:
-    int base_defence;
-    int actual_defence;
-
-    Armor(string name = "", string display_name = "", string slot_type = "armor",
-          string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Gear(name, display_name, slot_type, rarity, price, worth, components), base_defence(base_defence) {
-
-        Rarities r;
-
-        //r.applyRarity<Armor>(this);
-    }
-
-
-};
-
-class Helmet : public Armor
-{
-public:
-    Helmet(string name = "none", string display_name = "", string slot_type = "helmet",
-           string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Armor(name, display_name, slot_type, rarity, price, worth, components, base_defence) {
-
-    }
-    void get_data() const override;
-};
-
-class Chestplate : public Armor
-{
-public:
-    Chestplate(string name = "none", string display_name = "", string slot_type = "chestplate",
-               string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Armor(name, display_name, slot_type, rarity, price, worth, components, base_defence) {}
-    void get_data() const override;
-};
-
-class Leggins : public Armor
-{
-public:
-    Leggins(string name = "none", string display_name = "", string slot_type = "leggins",
-            string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Armor(name, display_name, slot_type, rarity, price, worth, components, base_defence) {}
-    void get_data() const override;
-};
-
-class Boots : public Armor
-{
-public:
-    Boots(string name = "none", string display_name = "", string slot_type = "boots",
-          string rarity = "common", int price = 0, int worth = 0, vector<Item> components = {}, int base_defence = 0)
-        : Armor(name, display_name, slot_type, rarity, price, worth, components, base_defence) {}
-    void get_data() const override;
 };
 
 #endif // ITEM_H
