@@ -1,669 +1,421 @@
 #include <iostream>
-#include <iomanip>
-#include "inventory.h"
+#include <cstdlib>
+#include <time.h>
+#include <map>
 #include <vector>
+#include <string>
+#include "item.h"
+#include "inventory.h"
+#include "items.h"
+
+// for platform specific functionality //  for now only clear() method in Game
+#if defined(_WIN32)
+#define PLATFORM_WINDOWS
+#elif defined(__APPLE__)
+#define PLATFORM_MACOS
+#else
+#endif
+
 
 using namespace std;
 
-Inventory::Inventory(int rows, int cols) : rows{rows}, cols{cols}
+class Shop
 {
-    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    gold = 250;
-    tab = new Item**[rows];
-    for(int i = 0; i < rows; i++)
+public:
+    bool inShop;
+    vector<string> itemChoices;
+    Item*** shopItems;
+    int rows;
+    int cols;
+
+
+    Shop()
     {
-        tab[i] = new Item*[cols];
-    }
-    for(int i = 0; i < rows; i++)
-    {
-        for(int j = 0; j < cols; j++)
-        {
-            tab[i][j] = nullptr;
-        }
-    }
-
-    battle_slots = new Item*[6];
-    battle_slots[0] = nullptr;
-    battle_slots[1] = nullptr;
-    battle_slots[2] = nullptr;
-    battle_slots[3] = nullptr;
-    battle_slots[4] = nullptr;
-    battle_slots[5] = nullptr;
-
-    fill_row_indexes();
-    fill_gear_slots();
-}
-
-void Inventory::fill_row_indexes()
-{
-    int numeric_value_of_capital_letter = 65;
-    for (int i = 0; i < rows; i++)
-    {
-        row_indexes[char(numeric_value_of_capital_letter)] = i;
-        numeric_value_of_capital_letter++;
-    }
-}
-
-void Inventory::fill_gear_slots()
-{
-    gear_slots["helmet"] = 0;
-    gear_slots["chestplate"] = 1;
-    gear_slots["leggins"] = 2;
-    gear_slots["boots"] = 3;
-    gear_slots["weapon"] = 4;
-    gear_slots["shield"] = 5;
-}
-
-void Inventory::display()
-{
-    cout << setw(4);
-    for(int numeration = 0; numeration < cols; numeration++)
-    {
-        cout << " " << numeration + 1 << " ";
-    }
-    cout << endl << setw(3);
-
-
-    for (int i = 0; i < rows; i++)
-    {
-        cout << letters[i];
-        for(int j = 0; j < cols; j++)
-        {
-            if(tab[i][j] == nullptr)
-            {
-                cout << "[ ]";
-            }
-            else
-            {
-                cout <<"[" << tab[i][j]->display_name << "]";
-            }
-        }
-        cout << endl << setw(3);
-    }
-    cout << "#";
-    for(int i = 0; i < 6; i++)
-    {
-        if(battle_slots[i] == nullptr)
-        {
-            cout << "{ }";
-        }
-        else
-        {
-            cout << "{" << battle_slots[i]->display_name << "}";
-        }
-    }
-    cout << endl;
-}
-
-void Inventory::displayGold()
-{
-    cout << "  Gold: " << this->gold << endl;
-}
-
-void Inventory::increaseGold(int amount)
-{
-    this->gold += amount;
-}
-
-void Inventory::decreaseGold(int amount)
-{
-    if (this->gold < amount)
-    {
-        this->gold = 0;
-    }
-    else
-    {
-        this->gold -= amount;
-    }
-}
-
-int Inventory::get_gear_slot_index(string item_slot_type)
-{
-    for (const auto& pair : this->gear_slots) {
-        if (item_slot_type == pair.first)
-        {
-            return pair.second;
-        }
-    }
-    return -1;
-}
-
-void Inventory::add_item(int row_cords, int col_cords, const Item& itemToAdd)
-{
-    tab[row_cords - 1][col_cords - 1] = new Item(itemToAdd);
-}
-
-auto Inventory::get_processed_cords(string cords) -> vector<int>
-{
-    auto process_cords_row = [this](string cords) -> int
-    {
-        char letter = char(cords[0]);
-
-        if((int(letter) >= 65) && (int(letter) <= 90)) // from capital A-Z
-        {
-            for (const auto& pair : this->row_indexes) {
-                if (pair.first == letter)
-                {
-                    return pair.second;
-                }
-            }
-        } else if(int(letter) == 35) // # character
-        {
-            return -1;
-        }
-        return -2;
-    };
-
-    int cords_row = process_cords_row(cords);
-    int cords_col = (cords[1] - '0') - 1;
-
-    return {cords_row, cords_col};
-}
-
-int Inventory::is_valid_cords_input(string cords)
-{
-    if (cords.size() > 2 || cords.size() < 2)
-    {
-        return -1;
-    }
-
-    int cords_row = get_processed_cords(cords)[0];
-    int cords_col = get_processed_cords(cords)[1];
-
-    // in main
-    if ((cords_row >= 0 && cords_row < this->rows) && (cords_col >= 0 && cords_col < this->cols))
-    {
-        return 1;
-    }
-    // in gear
-    else if((cords_row == -1) && (cords_col >= 0 && cords_col <= 5))
-    {
-        return 0;
-    }
-    // out of range/complete nonsense
-    else
-    {
-        return -1;
-    }
-}
-
-string Inventory::swap_items(string cords1, string cords2)
-{
-    if (is_valid_cords_input(cords1) >= 0 && is_valid_cords_input(cords2) >= 0)
-    {
-        // indexes -  do not corelate with numbers in console display // prc = processed (integer indexes)
-
-        vector<int> cords1_prc = get_processed_cords(cords1); // list[0] - row ; list[1] - col
-        vector<int> cords2_prc = get_processed_cords(cords2);
-
-        auto successMessage = []() -> string
-        {
-            return "Swap successful.";
+        rows = 3;
+        cols = 5;
+        inShop = true;
+        itemChoices = {
+            "item", "weapon", "shield", "helmet", "chestplate", "leggins", "boots"
         };
-
-        // if first input is in gear and second in main inventory
-        if(cords1_prc[0] == -1 && cords2_prc[0] >= 0)
-        {
-            Item* first = battle_slots[cords1_prc[1]]; // from gear slots
-            Item* second = tab[cords2_prc[0]][cords2_prc[1]]; // from main inventory
-
-            //both slots are NOT empty
-            if (first != nullptr && second != nullptr)
-            {
-                if (first->slot_type == second->slot_type) // both are same gear
-                {
-
-                    battle_slots[cords1_prc[1]] = second;
-                    tab[cords2_prc[0]][cords2_prc[1]] = first;
-
-                    return successMessage();
-                } else
-                {
-                    return "The selected items are not the same gear! Swap unsuccessful.";
-                }
-            }
-
-            // only first, gear slot is empty
-            else if(first == nullptr && second != nullptr)
-            {
-                if (cords1_prc[1] == get_gear_slot_index(second->slot_type)) // if slot is correct
-                {
-                    battle_slots[cords1_prc[1]] = second;
-                    tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
-
-                    return successMessage();
-                } else
-                {
-                    return "Wrong slot! Swap unsuccessful.";
-                }
-            }
-
-            // only second, general inventory slot is empty
-            else if(first != nullptr && second == nullptr)
-            {
-                battle_slots[cords1_prc[1]] = nullptr;
-                tab[cords2_prc[0]][cords2_prc[1]] = first;
-
-                return successMessage();
-            }
-
-            // both are empty
-            else if (first == nullptr && second == nullptr)
-            {
-                return "Both slots are empty! Swap unsuccessful.";
-            }
-        }
-
-
-        // if first input is in main and second in gear
-        else if(cords1_prc[0] >= 0 && cords2_prc[0] == -1)
-        {
-            Item* first = tab[cords1_prc[0]][cords1_prc[1]];
-            Item* second = battle_slots[cords2_prc[1]];
-
-            //both slots are NOT empty
-            if (first != nullptr && second != nullptr)
-            {
-                if (first->slot_type == second->slot_type)
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = second;
-                    battle_slots[cords2_prc[1]] = first;
-
-                    return successMessage();
-                } else
-                {
-                    return "The selected items are not the same gear! Swap unsuccessful.";
-                }
-            }
-
-            // first, main slot is empty
-            else if(first == nullptr && second != nullptr)
-            {
-                tab[cords1_prc[0]][cords1_prc[1]] = second;
-                battle_slots[cords2_prc[1]] = nullptr;
-
-                return successMessage();
-            }
-
-            // second, gear slot is empty
-            else if(first != nullptr && second == nullptr)
-            {
-                if (get_gear_slot_index(first->slot_type) == cords2_prc[1]) // correct slot
-                {
-                    tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
-                    battle_slots[cords2_prc[1]] = first;
-
-                    return successMessage();
-                } else
-                {
-                    return "Wrong slot! Swap unsuccessful.";
-                }
-            }
-
-            // both are empty
-            else if (first == nullptr && second == nullptr)
-            {
-                return "Both slots are empty! Swap unsuccessful.";
-            }
-        }
-
-
-        // if both inputs are in general
-        else if (cords1_prc[0] >= 0 && cords2_prc[0] >= 0)
-        {
-
-            Item* first = tab[cords1_prc[0]][cords1_prc[1]];
-            Item* second = tab[cords2_prc[0]][cords2_prc[1]];
-
-            // both NOT empty
-            if (first != nullptr && second != nullptr)
-            {
-                tab[cords1_prc[0]][cords1_prc[1]] = second;
-                tab[cords2_prc[0]][cords2_prc[1]] = first;
-
-                return successMessage();
-            }
-
-            // first empty
-            if (first == nullptr && second != nullptr)
-            {
-                tab[cords1_prc[0]][cords1_prc[1]] = second;
-                tab[cords2_prc[0]][cords2_prc[1]] = nullptr;
-
-                return successMessage();
-            }
-
-            // second empty
-            if (first != nullptr && second == nullptr)
-            {
-                tab[cords1_prc[0]][cords1_prc[1]] = nullptr;
-                tab[cords2_prc[0]][cords2_prc[1]] = first;
-
-                return successMessage();
-            }
-
-            // both are empty
-            else if (first == nullptr && second == nullptr)
-            {
-                return "Both slots are empty! Swap unsuccessful.";
-            }
-        }
-    } else
-    {
-        return "Your input is invalid! Swap unsuccessful.";
     }
-    return "Hi!";
-}
 
-
-string Inventory::delete_an_item(string cords)
-{
-    // input is valid
-    if (is_valid_cords_input(cords) >= 0)
+    int getRandomIndex()
     {
-        vector<int> cords_prc = get_processed_cords(cords);
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(0, itemChoices.size() - 1);
+        return dis(gen);
+    }
 
-        // in general
-        if (cords_prc[0] >= 0)
+    void fillShopItems()
+    {
+
+    }
+
+    void shop()
+    {
+
+    }
+};
+
+class Game
+{
+public:
+    Inventory* I;
+    bool isRunning;
+    string currentOperation;
+    string logsMessage; // logs info //  example: "Swap successful", "Couldn't inspect an item. Wrong input!" etc
+    enum class Operations
+    {
+        Default,
+        Swap,
+        Inspect,
+        Drop,
+        Blacksmith,
+        Upgrade,
+        Disassemble,
+
+        Exit,
+        Error
+    };
+    map<Operations, string> typesOfOperations;
+
+    Game()
+    {
+        I = new Inventory();
+        isRunning = true;
+        logsMessage = "Welcome!";
+        currentOperation = "default";
+
+        Items It;
+        Weapons W;
+        Helmets H;
+        Shields S;
+
+        I->add_item(2, 4, It.getRandomItem());
+        I->add_item(4, 1, It.getRandomItem());
+        I->add_item(3, 8, It.getRandomItem());
+        I->add_item(1, 4, It.getRandomItem());
+        I->add_item(1, 1, W.getRandomItem());
+        I->add_item(1, 6, H.getRandomItem());
+        I->add_item(3, 3, S.getRandomItem());
+
+
+        typesOfOperations[Operations::Default] = "default"; // display main menu
+        typesOfOperations[Operations::Swap] = "swap";
+        typesOfOperations[Operations::Inspect] = "inspect";
+        typesOfOperations[Operations::Drop] = "drop";
+        typesOfOperations[Operations::Blacksmith] = "blacksmith";
+        typesOfOperations[Operations::Upgrade] = "upgrade";
+        typesOfOperations[Operations::Disassemble] = "disassemble";
+
+        typesOfOperations[Operations::Exit] = "exit";
+
+        }
+
+    void run()
+    {
+        while(isRunning){
+            clear();
+            gameDisplay();
+        }
+
+        clear();
+
+        cout << endl;
+        cout << "-----------------------------------------" << endl;
+        cout << "  Thanks for playing!" << endl;
+        cout << "-----------------------------------------" << endl;
+    }
+
+    void gameDisplay()
+    {
+
+        logsDisplay();
+
+        Operations op = getCurrentOperation(currentOperation);
+        switch (op)
         {
+        case Operations::Default:
+            mainMenu();
+            break;
+        case Operations::Swap:
+            swapMenu();
+            break;
+        case Operations::Inspect:
+            inspectMenu();
+            break;
+        case Operations::Drop:
+            dropMenu();
+            break;
+        case Operations::Blacksmith:
+            blacksmithMenu();
+            break;
+        case Operations::Upgrade:
+            upgradeMenu();
+            break;
+        case Operations::Disassemble:
+            disassembleMenu();
+            break;
 
-            if (tab[cords_prc[0]][cords_prc[1]] != nullptr)
+        case Operations::Exit:
+            isRunning = !isRunning;
+            break;
+        case Operations::Error:
+            cout << "Some kind of error!" << endl;
+            break;
+        default:
+            cout << "Some kind of error!" << endl;
+            break;
+        }
+    }
+
+    Operations getCurrentOperation(string currentOperation)
+    {
+        for (const auto& pair : typesOfOperations)
+        {
+            if (pair.second == currentOperation)
             {
-                delete tab[cords_prc[0]][cords_prc[1]];
-
-                tab[cords_prc[0]][cords_prc[1]] = nullptr;
-
-                return "Delete successful!";
-            }
-            else
-            {
-                return "The slot is empty! Delete unsuccessful!";
+                return pair.first; // returns a enum operation value // will be used in gameDisplay
             }
         }
-        // in gear
-        else if(cords_prc[0] == -1)
+        return Operations::Error;
+    }
+
+    void mainMenu()
+    {
+        inventoryDisplay();
+
+        cout << endl << "  Possible actions:" << endl;
+        cout << "  1. Swap items." << endl;
+        cout << "  2. Inspect an item." << endl;
+        cout << "  3. Drop an item" << endl;
+        cout << "  4. Visit the blacksmith" << endl;
+        cout << "  exit. Exit game." << "\n\n";
+
+        string input;
+        cout << "  Input: ";
+        cin >> input;
+        cout << endl;
+
+        if (input == "1")
         {
+            currentOperation = "swap";
+            logsMessage = "Item swapping!";
+        }
+        else if (input == "2")
+        {
+            currentOperation = "inspect";
+            logsMessage = "Item inspecting!";
+        }
+        else if (input == "3")
+        {
+            currentOperation = "drop";
+            logsMessage = "Item dropping!";
+        }
+        else if (input == "4")
+        {
+            currentOperation = "blacksmith";
+            logsMessage = "Welcome to the blacksmith!";
+        }
 
-            if (battle_slots[cords_prc[1]] != nullptr)
-            {
-                delete battle_slots[cords_prc[1]];
-
-                battle_slots[cords_prc[1]] = nullptr;
-
-                return "Delete successful!";
-            }
-            else
-            {
-                return "The slot is empty! Delete unsuccessful!";
-            }
+        else if (input == "exit")
+        {
+            currentOperation = "exit";
         }
         else
         {
-            return "Some kind of error! Delete unsuccessful.";
+            logsMessage = "Couldn't pick an option. Your input must be invalid! Try typing a number!";
         }
     }
-    else
+
+    void swapMenu()
     {
-        return "Invalid input! Delete unsuccessful.";
+
+        inventoryDisplay();
+
+        cout << endl << "  Enter two coordinates to swap." << endl;
+
+        string cords1;
+        string cords2;
+
+        cout << "  First element: ";
+        cin >> cords1;
+        cout << endl;
+
+        cout << "  Second element: ";
+        cin >> cords2;
+        cout << endl;
+
+        logsMessage = I->swap_items(cords1, cords2);
+
+        currentOperation = "default";
     }
-}
 
-
-string Inventory::getInfo(string cords)
-{
-    if (is_valid_cords_input(cords) >= 0)
+    void inspectMenu()
     {
-        vector<int> cords_prc = get_processed_cords(cords);
+        inventoryDisplay();
 
-        Item* item;
+        string input;
+        cout << "  Select an item: ";
+        cin >> input;
 
-        if (cords_prc[0] >= 0)
+        cout << endl;
+
+        logsMessage = I->getInfo(input);
+
+        cout << endl;
+        string input1;
+        cout << "  Type anything to continue: ";
+        cin >> input1;
+
+        currentOperation = "default";
+    }
+
+    void blacksmithMenu()
+    {
+        inventoryDisplay();
+
+        cout << "  Chose an operation you'd like to perform." << endl;
+        cout << "  1. Upgrade an item." << endl;
+        cout << "  2. Disassemble an item." << endl;
+        cout << "  3. Exit." << endl << endl;
+
+        string input;
+        cout << "  Input: ";
+        cin >> input;
+
+        if (input == "1")
         {
-            if (tab[cords_prc[0]][cords_prc[1]] != nullptr)
-            {
-                item = tab[cords_prc[0]][cords_prc[1]];
-            }
-            else
-            {
-                return "The slot is empty!";
-            }
+            logsMessage = "Upgrading!";
+            currentOperation = "upgrade";
         }
-        else if (cords_prc[0] == -1)
+        else if (input == "2")
         {
-            if (battle_slots[cords_prc[1]] != nullptr)
-            {
-                item = battle_slots[cords_prc[1]];
-            }
-            else
-            {
-                return "The slot is empty!";
-            }
+            logsMessage = "Disassembling!";
+            currentOperation = "disassemble";
+        }
+        else if (input == "3")
+        {
+            logsMessage = "Blacksmith exited.";
+            currentOperation = "default";
         }
         else
         {
-            return "Invalid input!";
-        }
-
-        item->get_data();
-        return "Inspection successful!";
-
-    }
-    else
-    {
-        return "Your input is invalid!";
-    }
-}
-
-vector<int> Inventory::getFirstEmptySlot()
-{
-    for (int i = 0; i < this->rows; i++)
-    {
-        for (int j = 0; j < this->cols; j++)
-        {
-            return {rows, cols};
+            logsMessage = "Nonexistent input! Try again.";
+            currentOperation = "blacksmith";
         }
     }
-    return {-1, -1}; // inventory full
-}
 
-string Inventory::upgradeAnItem(string cords, int* playerGold)
-{
-    Rarities r;
-    vector<Rarity> rarities = r.rarities;
-
-    if (is_valid_cords_input(cords) >= 0)
+    void upgradeMenu()
     {
-        vector<int> cords_prc = get_processed_cords(cords);
+        inventoryDisplay();
+        I->displayGold();
 
-        if (cords_prc[0] >= 0) // main eq
-        {
-            Item* item = tab[cords_prc[0]][cords_prc[1]];
+        cout << endl << "  Costs:"  << endl;
+        cout << "  Common->Uncommon - 15" << endl;
+        cout << "  Uncommon->Rare - 25" << endl;
+        cout << "  Rare->Epic - 35" << endl;
+        cout << "  Common->Uncommon - 50" << endl << endl;
 
-            if (item != nullptr)
-            {
-                if (item->rarity == "Legendary")
-                {
-                    return "Max rarity. Can't upgrade.";
-                }
-    
-                for (int i = 0; i < rarities.size(); i++)
-                {
-                    if (rarities[i].name == item->rarity)
-                    {
-                        int cost = rarities[i+1].cost;
-                        if (cost > *playerGold)
-                        {
-                            return "Cant afford!";
-                        }
-                        else
-                        {
-                            item->rarity = rarities[i+1].name;
-                            item->applyToItem();
-                            *playerGold -= cost;
-                            return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
-                        }
-                    }
-                }
-                return "Undefined rarity.";
-            }
-            else
-            {
-                return "An empty slot!";
-            }
-        }
+        string input;
+        cout << "  Select an item to upgrade: ";
+        cin >> input;
 
-        else if(cords_prc[0] == -1) // gear eq
-        {
-            Item* item = battle_slots[cords_prc[1]];
+        logsMessage = I->upgradeAnItem(input, &I->gold);
 
-            if (item != nullptr)
-            {
-                if (item->rarity == "Legendary")
-                {
-                    return "Max rarity. Can't upgrade.";
-                }
-    
-                for (int i = 0; i < rarities.size(); i++)
-                {
-                    if (rarities[i].name == item->rarity)
-                    {
-                        int cost = rarities[i+1].cost;
-                        if (cost > *playerGold)
-                        {
-                            return "Cant afford!";
-                        }
-                        else
-                        {
-                            item->rarity = rarities[i+1].name;
-                            item->applyToItem();
-                            *playerGold -= cost;
-                            return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
-                        }
-                    }
-                }
-                return "Undefined rarity.";
-            }
-            else
-            {
-                return "An empty slot!";
-            }
-        }
+        currentOperation = "blacksmith";
     }
-    else
-    {
-        return "Invalid input! Upgrade unsuccessful.";
-    }
-    return "Hi!";
-}
 
-
-string Inventory::disassembleAnItem(string cords)
-{
-    if (is_valid_cords_input(cords) >= 0)
+    void disassembleMenu()
     {
-        vector<int> cords_prc = get_processed_cords(cords);
+        inventoryDisplay();
         
-        if (cords_prc[0] >= 0) // main eq
-        {
-            Item* item = tab[cords_prc[0]][cords_prc[1]];
-            
-            if (item != nullptr)
-            {
-                if (item->slot_type != "general")
-                {
-                    vector<Item> components = item->components;
-                    
-                    for (int i = 0; i < components.size(); i++)
-                    {
-                        vector<int> emptySlot = getFirstEmptySlot();
-                        
-                        if (emptySlot[0] != -1)
-                        {
-                            tab[emptySlot[0]][emptySlot[1]] = components[i];
-                        }
-                        else
-                        {
-                            return "Inventory full. Some items have been lost!";
-                        }
-                    }
-                    delete item;
-                    tab[cords_prc[0]][cords_prc[1]] = nullptr;
-                    return "Disassemble successful!";
-                }
-                else
-                {
-                    return "Can't disassemble a basic item!";
-                }
-            }
-            else
-            {
-                return "An empty slot!";
-            }
-        }
-        else if (cords_prc[0] == -1) // gear eq
-        {
-            Item* item = battle_slots[cords_prc[1]];
-            
-            if (item != nullptr)
-            {
-                if (item->slot_type != "general")
-                {
-                    vector<Item> components = item->components;
-                    
-                    for (int i = 0; i < components.size(); i++)
-                    {
-                        vector<int> emptySlot = getFirstEmptySlot();
-                        
-                        if (emptySlot[0] != -1)
-                        {
-                            tab[emptySlot[0]][emptySlot[1]] = components[i];
-                        }
-                        else
-                        {
-                            return "Inventory full. Some items have been lost!";
-                        }
-                    }
-                    delete item;
-                    battle_slots[cords_prc[1]] = nullptr;
-                    return "Disassemble successful!";
-                }
-                else
-                {
-                    return "Can't disassemble a basic item!";
-                }
-            }
-            else
-            {
-                return "An empty slot!";
-            }
-        }
+        string input;
+        cout << "  Select an item to disassemble: ";
+        cin >> input;
+        
+        
+        
+        currentOperation = "blacksmith";
     }
-    else
-    {
-        return "Invalid input!";
-    }
-    return "Hi!";
-}
 
-Inventory::~Inventory()
+    void dropMenu()
+    {
+        inventoryDisplay();
+
+        cout << endl << "  Enter coordinate to delete." << endl;
+
+        string cords;
+
+        cout << "  Delete an item: ";
+        cin >> cords;
+        cout << endl;
+
+        logsMessage = I->delete_an_item(cords);
+
+        currentOperation = "default";
+    }
+
+    void sortMenu()
+    {
+        // empty
+    }
+
+    void logsDisplay()
+    {
+        cout << "--------------------------------------------------------------------------------" << endl;
+        cout << "  " << logsMessage << endl;
+        cout << "--------------------------------------------------------------------------------" << endl;
+        cout << "\n";
+    }
+
+    void inventoryDisplay()
+    {
+        cout << endl << "  Inventory:" << endl;
+        I->display();
+        cout << endl;
+    }
+
+    void clear()
+    {
+#ifdef PLATFORM_WINDOWS
+        system("cls");
+#elif defined(PLATFORM_MACOS)
+        system("clear");
+#else
+#endif
+    }
+
+    ~Game()
+    {
+        delete I;
+    }
+};
+
+int main()
 {
-    for(int i = 0; i < rows; i++)
-    {
-        for(int j = 0; j < cols; j++)
-        {
-            delete[] tab[i][j];
-        }
-    }
-    for(int i = 0; i < rows; i++)
-    {
-        delete[] tab[i];
-    }
-    delete[] tab;
 
-    //deletes gear items and list
-    for (int i = 0; i < 6; i++)
-    {
-        delete[] battle_slots[i];
-    }
-    delete[] battle_slots;
+    Game game;
+
+    //game.gameDisplay();
+    game.run();
+
+    Inventory I;
+    Items It;
+
+//    I.add_item(2, 4, It.getRandomItem());
+//    I.add_item(4, 1, It.getRandomItem());
+//    I.add_item(3, 8, It.getRandomItem());
+//    I.add_item(1, 4, It.getRandomItem());
+//    I.add_gear_to_main(1, 1, Boots("", "B"));
+//    I.add_gear_to_main(1, 6, Weapon("Sigma", "W"));
+
+//    cout << I.swap_items("A1", "#4") << endl;
+
+//    I.display();
+
+//    I.getInfo("D1");
+
+    return 0;
 }
