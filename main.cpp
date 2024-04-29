@@ -329,7 +329,15 @@ public:
 
     void disassembleMenu()
     {
-
+        inventoryDisplay();
+        
+        string input;
+        cout << "  Select an item to disassemble: ";
+        cin >> input;
+        
+        
+        
+        currentOperation = "blacksmith";
     }
 
     void dropMenu()
