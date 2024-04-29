@@ -460,7 +460,10 @@ vector<int> Inventory::getFirstEmptySlot()
     {
         for (int j = 0; j < this->cols; j++)
         {
-            return {rows, cols};
+            if (tab[rows][cols] == nullptr)
+            {
+                return {rows, cols};
+            }
         }
     }
     return {-1, -1}; // inventory full
@@ -556,14 +559,13 @@ string Inventory::upgradeAnItem(string cords, int* playerGold)
     return "Hi!";
 }
 
-
-string Inventory::disassembleAnItem(string cords)
+string Inventory::validItem(string cords)
 {
     if (is_valid_cords_input(cords) >= 0)
     {
         vector<int> cords_prc = get_processed_cords(cords);
         
-        if (cords_prc[0] >= 0) // main eq
+        if (cords_prc[0] >= -1)
         {
             Item* item = tab[cords_prc[0]][cords_prc[1]];
             
@@ -571,24 +573,7 @@ string Inventory::disassembleAnItem(string cords)
             {
                 if (item->slot_type != "general")
                 {
-                    vector<Item> components = item->components;
-                    
-                    for (int i = 0; i < components.size(); i++)
-                    {
-                        vector<int> emptySlot = getFirstEmptySlot();
-                        
-                        if (emptySlot[0] != -1)
-                        {
-                            tab[emptySlot[0]][emptySlot[1]] = components[i];
-                        }
-                        else
-                        {
-                            return "Inventory full. Some items have been lost!";
-                        }
-                    }
-                    delete item;
-                    tab[cords_prc[0]][cords_prc[1]] = nullptr;
-                    return "Disassemble successful!";
+                    return "correct";
                 }
                 else
                 {
@@ -600,49 +585,59 @@ string Inventory::disassembleAnItem(string cords)
                 return "An empty slot!";
             }
         }
-        else if (cords_prc[0] == -1) // gear eq
+        else
         {
-            Item* item = battle_slots[cords_prc[1]];
-            
-            if (item != nullptr)
-            {
-                if (item->slot_type != "general")
-                {
-                    vector<Item> components = item->components;
-                    
-                    for (int i = 0; i < components.size(); i++)
-                    {
-                        vector<int> emptySlot = getFirstEmptySlot();
-                        
-                        if (emptySlot[0] != -1)
-                        {
-                            tab[emptySlot[0]][emptySlot[1]] = components[i];
-                        }
-                        else
-                        {
-                            return "Inventory full. Some items have been lost!";
-                        }
-                    }
-                    delete item;
-                    battle_slots[cords_prc[1]] = nullptr;
-                    return "Disassemble successful!";
-                }
-                else
-                {
-                    return "Can't disassemble a basic item!";
-                }
-            }
-            else
-            {
-                return "An empty slot!";
-            }
+            return "Invalid input!";
         }
     }
     else
     {
-        return "Invalid input!";
+        return  "Invalid input!";
     }
     return "Hi!";
+}
+
+string Inventory::disassembleAnItem(string cords)
+{
+    vector<int> cords_prc = get_processed_cords(cords);
+    
+    if (cords_prc[0] >= 0) // main eq
+    {
+        Item* item = tab[cords_prc[0]][cords_prc[1]];
+        vector<Item> components = item->components;
+        
+        return "Main eq";
+    }
+    else if (cords_prc[0] == -1)
+    {
+        return "Gear eq";
+    }
+}
+
+void Inventory::displayItemComponents(string cords)
+{
+    vector<int> cords_prc = get_processed_cords(cords);
+    
+    if (cords_prc[0] >= 0) // main eq
+    {
+        Item* item = tab[cords_prc[0]][cords_prc[1]];
+        vector<Item> components = item->components;
+        
+        for (int i = 0; i < components.size(); i++)
+        {
+            cout << "  " << components[i].name << endl;
+        }
+    }
+    else if (cords_prc[0] == -1) // gear eq
+    {
+        Item* item = battle_slots[cords_prc[1]];
+        vector<Item> components = item->components;
+        
+        for (int i = 0; i < components.size(); i++)
+        {
+            cout << "  " << components[i].name << endl;
+        }
+    }
 }
 
 Inventory::~Inventory()
