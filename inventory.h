@@ -66,12 +66,17 @@ public:
 
 
     vector<int> getFirstEmptySlot();
-
+    
 
     string upgradeAnItem(string cords, int* playerGold);
 
 
     string disassembleAnItem(string cords);
+    
+    
+    void displayItemComponents(string cords);
+    
+    string validItem(string cords);
 
 
     ~Inventory();
