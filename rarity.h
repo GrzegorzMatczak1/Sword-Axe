@@ -57,7 +57,7 @@ public:
         {
             item->actual_damage = item->base_damage + getRarity(item->rarity).damageMultiplier;
             item->worth = item->worth + getRarity(item->rarity).worthIncrease;
-        } 
+        }
         else if (item->slot_type == "general")
         {
             item->worth = item->worth + getRarity(item->rarity).worthIncrease;
