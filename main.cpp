@@ -369,6 +369,7 @@ public:
             cout << "Choose one option:" << endl;
             cout << "1. Attack" << endl;
             cout << "2. Defend" << endl;
+            cout << "3. Give up" << endl;
             cout << "Your option: ";
             cin >> option_attack;
             cout << endl;
@@ -455,6 +456,35 @@ public:
                 {
                     message = "Bough you and enemy used defend!";
                 }
+                show_message(message);
+            }
+            else if(option_attack[0] == 'G' || option_attack[0] == 'g' || option_attack[0] == '3')
+            {
+                string option_give_up;
+                
+                cout << "Are you sure you want to give up?" << endl;
+                cout << "1. Yes" << endl;
+                cout << "2. No" << endl;
+                
+                cout << "Your option: ";
+                cin >> option_give_up;
+                cout << endl;
+
+                if(option_give_up[0] == 'Y' || option_attack[0] == 'y' || option_attack[0] == '1')
+                {
+                    game_end = true;
+                    game_won = false;
+                }
+                else
+                {
+                    string skipper;
+
+                    cout << "Game contiues" << endl;
+                    
+                    cout << "Type anything to continue: ";
+                    cin >> skipper;
+                    cout << endl;
+                }
             }
             else {
                 cout << "Wrong input! Type attack or defence or their corresponding numers!" << endl;
@@ -481,12 +511,26 @@ public:
             cout << "Type anything to continue: ";
             cin >> skipper;
             cout << endl;
+
+            cout << enemy_name << ": " << loose_message << endl;
+            cout << "Type anything to continue: ";
+            cin >> skipper;
+            cout << endl;
         }
         else
         {
             string skipper;
             show_message("You have lost!");
             //logsMessage = "You have lost!";
+            cout << "Type anything to continue: ";
+            cin >> skipper;
+            cout << endl;
+
+            
+            cout << enemy_name << ": " << win_message << endl;
+            cout << "Type anything to continue: ";
+            cin >> skipper;
+            cout << endl;
         }
     }
 
@@ -503,7 +547,7 @@ public:
         enemy_list[4] = Enemy("Elf", 50, 20, 5, "I will pierce you with my bow and arrow, and then I will finish you with my sword", "You didn't even stand a chance. Poor you", "Impossible...");
         enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zord did what he said he would do");
         enemy_list[6] = Enemy("Barbarrian", 60, 40, 2, "I will make you into thin slices with my swords", "Barbarrian has cut you into chips", "How did you even.. NOOOOOOOO");
-        enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME");
+        enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME (Destiny is his sword)");
         enemy_list[8] = Enemy("Mage", 6, 100, 0, "FIREBALL", "HAHAHAHAHA! FIREBALL! FIREBALL! F I R E B A L L", "Died 1d4 Introverted"); //Died of emotional damage 💀
         enemy_list[9] = Enemy("Spider", 20, 30, 2, "SSSSKASKKAS *translating: Can I bite you pls? It wont hurt that much :3*", "SKASSA SAKA *translating: Told ya it wont hurt that much. Anywas youll be a tasty snack :3*");
         enemy_list[10] = Enemy("Queen spider", 100, 6, 10, "GET OUT OF MY LAND YOU LITTLE PESSANT!", "SHOULDNT HAVE CAME HERE IN THE FRIST PLACE. NOW LOOK AT YOU! ALL BROKEN AND SMASHED TO THE GROUND", "IMPOSSIBLE! KILLED BY A PESSANT! NOOOOOOOO!");
@@ -538,7 +582,9 @@ public:
     void show_message(string message) //With out my old code :(. Anyways it displays a message if you attacked or not ect i will make it look preatier later :) (the message)
     {
 
-        cout << message << endl;
+        cout << "--------------------------------------------------------------------------------" << endl;
+        cout << "  " << message << endl;
+        cout << "--------------------------------------------------------------------------------" << endl << endl;
 
     }
 
