@@ -64,7 +64,7 @@ public:
     Inventory* I;
     bool isRunning;
     string currentOperation;
-    string logsMessage; // logs info //  example: "Swap successful", "Couldn't inspect an item. Wrong input!" etc
+    string logsMessage;
     enum class Operations
     {
         Default,
@@ -74,7 +74,7 @@ public:
         Blacksmith,
         Upgrade,
         Disassemble,
-
+        
         Exit,
         Error
     };
@@ -155,8 +155,9 @@ public:
             upgradeMenu();
             break;
         case Operations::Disassemble:
-            disassembleMenu();
+            disassembleSelectMenu();
             break;
+
 
         case Operations::Exit:
             isRunning = !isRunning;
@@ -176,7 +177,7 @@ public:
         {
             if (pair.second == currentOperation)
             {
-                return pair.first; // returns a enum operation value // will be used in gameDisplay
+                return pair.first;
             }
         }
         return Operations::Error;
@@ -327,17 +328,55 @@ public:
         currentOperation = "blacksmith";
     }
 
-    void disassembleMenu()
+    void disassembleSelectMenu()
     {
         inventoryDisplay();
         
         string input;
         cout << "  Select an item to disassemble: ";
         cin >> input;
+        cout << endl;
         
-        
+        if (I->validItem(input) != "correct")
+        {
+            logsMessage = I->validItem(input);
+        }
+        else
+        {
+            disassembleConfirmation(input);
+        }
         
         currentOperation = "blacksmith";
+    }
+    
+    void disassembleConfirmation(string userInput)
+    {
+        logsDisplay();
+        inventoryDisplay();
+        
+        cout << endl << "  Selected item's components:" << "\n\n";
+        I->displayItemComponents(userInput);
+        cout << "\n\n";
+        
+        string choice;
+        cout << "  Would you like to disassemble the item?  [y/n]  : ";
+        cin >> choice;
+        cout << endl;
+        
+        if (choice == "y")
+        {
+            logsMessage = I->disassembleAnItem(userInput);
+        }
+        else if (choice == "n")
+        {
+            logsMessage = "Canceled.";
+        }
+        else
+        {
+            logsMessage = "Invalid choice!";
+            disassembleConfirmation(userInput);
+        }
+        
     }
 
     void dropMenu()
