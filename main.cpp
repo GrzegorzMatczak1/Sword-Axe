@@ -3,10 +3,10 @@
 #include <time.h>
 #include <map>
 #include <vector>
-#include <string>
 #include "item.h"
 #include "inventory.h"
 #include "items.h"
+#include "shop.h"
 
 // for platform specific functionality //  for now only clear() method in Game
 #if defined(_WIN32)
@@ -19,49 +19,11 @@
 
 using namespace std;
 
-class Shop
-{
-public:
-    bool inShop;
-    vector<string> itemChoices;
-    Item*** shopItems;
-    int rows;
-    int cols;
-
-
-    Shop()
-    {
-        rows = 3;
-        cols = 5;
-        inShop = true;
-        itemChoices = {
-            "item", "weapon", "shield", "helmet", "chestplate", "leggins", "boots"
-        };
-    }
-
-    int getRandomIndex()
-    {
-        random_device rd;
-        mt19937 gen(rd());
-        uniform_int_distribution<> dis(0, itemChoices.size() - 1);
-        return dis(gen);
-    }
-
-    void fillShopItems()
-    {
-
-    }
-
-    void shop()
-    {
-
-    }
-};
-
 class Game
 {
 public:
     Inventory* I;
+    Shop* S;
     bool isRunning;
     string currentOperation;
     string logsMessage;
@@ -74,7 +36,12 @@ public:
         Blacksmith,
         Upgrade,
         Disassemble,
-        
+        Shop,
+        Sell,
+        Buy,
+        Reroll,
+        Check,
+        Expedition,
         Exit,
         Error
     };
@@ -83,6 +50,7 @@ public:
     Game()
     {
         I = new Inventory();
+        S = new Shop();
         isRunning = true;
         logsMessage = "Welcome!";
         currentOperation = "default";
@@ -90,28 +58,34 @@ public:
         Items It;
         Weapons W;
         Helmets H;
-        Shields S;
+        Bootses B;
 
         I->add_item(2, 4, It.getRandomItem());
         I->add_item(4, 1, It.getRandomItem());
         I->add_item(3, 8, It.getRandomItem());
         I->add_item(1, 4, It.getRandomItem());
+        I->add_item(2, 7, It.getRandomItem());
         I->add_item(1, 1, W.getRandomItem());
         I->add_item(1, 6, H.getRandomItem());
-        I->add_item(3, 3, S.getRandomItem());
+        I->add_item(3, 3, B.getRandomItem());
 
 
-        typesOfOperations[Operations::Default] = "default"; // display main menu
+        typesOfOperations[Operations::Default] = "default";
         typesOfOperations[Operations::Swap] = "swap";
         typesOfOperations[Operations::Inspect] = "inspect";
         typesOfOperations[Operations::Drop] = "drop";
         typesOfOperations[Operations::Blacksmith] = "blacksmith";
         typesOfOperations[Operations::Upgrade] = "upgrade";
         typesOfOperations[Operations::Disassemble] = "disassemble";
-
+        typesOfOperations[Operations::Shop] = "shop";
+        typesOfOperations[Operations::Sell] = "sell";
+        typesOfOperations[Operations::Buy] = "buy";
+        typesOfOperations[Operations::Reroll] = "reroll";
+        typesOfOperations[Operations::Check] = "check";
+        typesOfOperations[Operations::Expedition] = "expedition";
         typesOfOperations[Operations::Exit] = "exit";
 
-        }
+    }
 
     void run()
     {
@@ -157,6 +131,24 @@ public:
         case Operations::Disassemble:
             disassembleSelectMenu();
             break;
+        case Operations::Shop:
+            shopMenu();
+            break;
+        case Operations::Sell:
+            sellMenu();
+            break;
+        case Operations::Reroll:
+            rerollMenu();
+            break;
+        case Operations::Buy:
+            buyMenu();
+            break;
+        case Operations::Check:
+            checkMenu();
+            break;
+        case Operations::Expedition:
+            expeditionMenu();
+            break;
 
 
         case Operations::Exit:
@@ -192,7 +184,9 @@ public:
         cout << "  2. Inspect an item." << endl;
         cout << "  3. Drop an item" << endl;
         cout << "  4. Visit the blacksmith" << endl;
-        cout << "  exit. Exit game." << "\n\n";
+        cout << "  5. Visit Shop" << endl;
+        cout << "  6. Go on an expedition" << endl;
+        cout << "  7. Exit game." << "\n\n";
 
         string input;
         cout << "  Input: ";
@@ -219,8 +213,18 @@ public:
             currentOperation = "blacksmith";
             logsMessage = "Welcome to the blacksmith!";
         }
+        else if (input == "5")
+        {
+            currentOperation = "shop";
+            logsMessage = "Welcome to the Shop!";
+        }
+        else if (input == "6")
+        {
+            currentOperation = "expedition";
+            logsMessage = "Expedition!";
+        }
 
-        else if (input == "exit")
+        else if (input == "7")
         {
             currentOperation = "exit";
         }
@@ -331,12 +335,12 @@ public:
     void disassembleSelectMenu()
     {
         inventoryDisplay();
-        
+
         string input;
         cout << "  Select an item to disassemble: ";
         cin >> input;
         cout << endl;
-        
+
         if (I->validItem(input) != "correct")
         {
             logsMessage = I->validItem(input);
@@ -345,24 +349,25 @@ public:
         {
             disassembleConfirmation(input);
         }
-        
+
         currentOperation = "blacksmith";
     }
-    
+
     void disassembleConfirmation(string userInput)
     {
+        clear();
         logsDisplay();
         inventoryDisplay();
-        
+
         cout << endl << "  Selected item's components:" << "\n\n";
         I->displayItemComponents(userInput);
         cout << "\n\n";
-        
+
         string choice;
         cout << "  Would you like to disassemble the item?  [y/n]  : ";
         cin >> choice;
         cout << endl;
-        
+
         if (choice == "y")
         {
             logsMessage = I->disassembleAnItem(userInput);
@@ -376,7 +381,7 @@ public:
             logsMessage = "Invalid choice!";
             disassembleConfirmation(userInput);
         }
-        
+
     }
 
     void dropMenu()
@@ -396,10 +401,119 @@ public:
         currentOperation = "default";
     }
 
-    void sortMenu()
+    void shopMenu()
     {
-        // empty
+        shopDisplay();
+        I->displayGold();
+
+        cout << "  Possible actions:" << endl;
+        cout << "  1. Sell your item." << endl;
+        cout << "  2. Buy an item." << endl;
+        cout << "  3. Reroll the shop stock. Cost - 50 gold" << endl;
+        cout << "  4. See item info." << endl;
+        cout << "  5. Exit." << endl << endl;
+
+        string input;
+        cout << "  Input: ";
+        cin >> input;
+
+        if (input == "1")
+        {
+            currentOperation = "sell";
+            logsMessage = "Shop exited.";
+        }
+        else if (input == "2")
+        {
+            currentOperation = "buy";
+            logsMessage = "Buy an item.";
+        }
+        else if (input == "3")
+        {
+            currentOperation = "reroll";
+            logsMessage = "Rerolling.";
+        }
+        else if (input == "4")
+        {
+            currentOperation = "check";
+            logsMessage = "Item info.";
+        }
+        else if (input == "5")
+        {
+            currentOperation = "default";
+            logsMessage = "Shop exited.";
+        }
+        else
+        {
+            currentOperation = "shop";
+            logsMessage = "Invalid input. Please try again.";
+        }
     }
+
+    void sellMenu()
+    {
+        inventoryDisplay();
+        I->displayGold();
+
+        string input;
+        cout << "  Which item would you like to sell: ";
+        cin >> input;
+
+        logsMessage = I->sellAnItem(input);
+
+        currentOperation = "shop";
+    }
+    void buyMenu()
+    {
+        shopDisplay();
+        I->displayGold();
+
+        string input;
+        cout << "  Which item would you like to buy: ";
+        cin >> input;
+
+        logsMessage = S->buyAnItem(input, I, &I->gold);
+
+        currentOperation = "shop";
+    }
+
+    void rerollMenu()
+    {
+        logsMessage = S->rerollShop(&I->gold);
+        currentOperation = "shop";
+    }
+
+    void checkMenu()
+    {
+        shopDisplay();
+
+        string input;
+        cout << "  Get info of: ";
+        cin >> input;
+        cout << endl;
+
+        logsMessage = S->check(input);
+
+        string whatever;
+        cout << endl << "  Type anything when you're done: ";
+        cin >> whatever;
+
+        currentOperation = "shop";
+    }
+
+
+    ///===============================================================================================================
+
+    void expeditionMenu()
+    {
+
+    }
+
+
+
+
+
+
+    ///===============================================================================================================
 
     void logsDisplay()
     {
@@ -407,6 +521,13 @@ public:
         cout << "  " << logsMessage << endl;
         cout << "--------------------------------------------------------------------------------" << endl;
         cout << "\n";
+    }
+
+    void shopDisplay()
+    {
+        cout << endl << "  Shop Stock:" << endl;
+        S->display();
+        cout << "\n\n";
     }
 
     void inventoryDisplay()
@@ -429,6 +550,7 @@ public:
     ~Game()
     {
         delete I;
+        delete S;
     }
 };
 
@@ -436,25 +558,7 @@ int main()
 {
 
     Game game;
-
-    //game.gameDisplay();
     game.run();
-
-    Inventory I;
-    Items It;
-
-//    I.add_item(2, 4, It.getRandomItem());
-//    I.add_item(4, 1, It.getRandomItem());
-//    I.add_item(3, 8, It.getRandomItem());
-//    I.add_item(1, 4, It.getRandomItem());
-//    I.add_gear_to_main(1, 1, Boots("", "B"));
-//    I.add_gear_to_main(1, 6, Weapon("Sigma", "W"));
-
-//    cout << I.swap_items("A1", "#4") << endl;
-
-//    I.display();
-
-//    I.getInfo("D1");
 
     return 0;
 }
