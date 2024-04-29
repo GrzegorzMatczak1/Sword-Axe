@@ -479,58 +479,74 @@ string Inventory::upgradeAnItem(string cords, int* playerGold)
         {
             Item* item = tab[cords_prc[0]][cords_prc[1]];
 
-            if (item->rarity == "Legendary")
+            if (item != nullptr)
             {
-                return "Max rarity. Can't upgrade.";
-            }
-
-            for (int i = 0; i < rarities.size(); i++)
-            {
-                if (rarities[i].name == item->rarity)
+                if (item->rarity == "Legendary")
                 {
-                    int cost = rarities[i+1].cost;
-                    if (cost > *playerGold)
+                    return "Max rarity. Can't upgrade.";
+                }
+    
+                for (int i = 0; i < rarities.size(); i++)
+                {
+                    if (rarities[i].name == item->rarity)
                     {
-                        return "Cant afford!";
-                    }
-                    else
-                    {
-                        item->rarity = rarities[i+1].name;
-                        *playerGold -= cost;
-                        return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                        int cost = rarities[i+1].cost;
+                        if (cost > *playerGold)
+                        {
+                            return "Cant afford!";
+                        }
+                        else
+                        {
+                            item->rarity = rarities[i+1].name;
+                            item->applyToItem();
+                            *playerGold -= cost;
+                            return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                        }
                     }
                 }
+                return "Undefined rarity.";
             }
-            return "Undefined rarity.";
+            else
+            {
+                return "An empty slot!";
+            }
         }
 
         else if(cords_prc[0] == -1) // gear eq
         {
             Item* item = battle_slots[cords_prc[1]];
 
-            if (item->rarity == "Legendary")
+            if (item != nullptr)
             {
-                return "Max rarity. Can't upgrade.";
-            }
-
-            for (int i = 0; i < rarities.size(); i++)
-            {
-                if (rarities[i].name == item->rarity)
+                if (item->rarity == "Legendary")
                 {
-                    int cost = rarities[i+1].cost;
-                    if (cost > *playerGold)
+                    return "Max rarity. Can't upgrade.";
+                }
+    
+                for (int i = 0; i < rarities.size(); i++)
+                {
+                    if (rarities[i].name == item->rarity)
                     {
-                        return "Cant afford!";
-                    }
-                    else
-                    {
-                        item->rarity = rarities[i+1].name;
-                        *playerGold -= cost;
-                        return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                        int cost = rarities[i+1].cost;
+                        if (cost > *playerGold)
+                        {
+                            return "Cant afford!";
+                        }
+                        else
+                        {
+                            item->rarity = rarities[i+1].name;
+                            item->applyToItem();
+                            *playerGold -= cost;
+                            return "Upgraded an item to " + item->rarity + " for " + to_string(cost) + " gold.";
+                        }
                     }
                 }
+                return "Undefined rarity.";
             }
-            return "Undefined rarity.";
+            else
+            {
+                return "An empty slot!";
+            }
         }
     }
     else
@@ -543,9 +559,90 @@ string Inventory::upgradeAnItem(string cords, int* playerGold)
 
 string Inventory::disassembleAnItem(string cords)
 {
-
-    return "";
-
+    if (is_valid_cords_input(cords) >= 0)
+    {
+        vector<int> cords_prc = get_processed_cords(cords);
+        
+        if (cords_prc[0] >= 0) // main eq
+        {
+            Item* item = tab[cords_prc[0]][cords_prc[1]];
+            
+            if (item != nullptr)
+            {
+                if (item->slot_type != "general")
+                {
+                    vector<Item> components = item->components;
+                    
+                    for (int i = 0; i < components.size(); i++)
+                    {
+                        vector<int> emptySlot = getFirstEmptySlot();
+                        
+                        if (emptySlot[0] != -1)
+                        {
+                            tab[emptySlot[0]][emptySlot[1]] = components[i];
+                        }
+                        else
+                        {
+                            return "Inventory full. Some items have been lost!";
+                        }
+                    }
+                    delete item;
+                    tab[cords_prc[0]][cords_prc[1]] = nullptr;
+                    return "Disassemble successful!";
+                }
+                else
+                {
+                    return "Can't disassemble a basic item!";
+                }
+            }
+            else
+            {
+                return "An empty slot!";
+            }
+        }
+        else if (cords_prc[0] == -1) // gear eq
+        {
+            Item* item = battle_slots[cords_prc[1]];
+            
+            if (item != nullptr)
+            {
+                if (item->slot_type != "general")
+                {
+                    vector<Item> components = item->components;
+                    
+                    for (int i = 0; i < components.size(); i++)
+                    {
+                        vector<int> emptySlot = getFirstEmptySlot();
+                        
+                        if (emptySlot[0] != -1)
+                        {
+                            tab[emptySlot[0]][emptySlot[1]] = components[i];
+                        }
+                        else
+                        {
+                            return "Inventory full. Some items have been lost!";
+                        }
+                    }
+                    delete item;
+                    battle_slots[cords_prc[1]] = nullptr;
+                    return "Disassemble successful!";
+                }
+                else
+                {
+                    return "Can't disassemble a basic item!";
+                }
+            }
+            else
+            {
+                return "An empty slot!";
+            }
+        }
+    }
+    else
+    {
+        return "Invalid input!";
+    }
+    return "Hi!";
 }
 
 Inventory::~Inventory()
