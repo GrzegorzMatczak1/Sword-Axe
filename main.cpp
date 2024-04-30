@@ -787,6 +787,8 @@ public:
             cin >> skipper;
             cout << endl;
 
+            //add gold here :)
+
             currentOperation = "default";
         }
         else
