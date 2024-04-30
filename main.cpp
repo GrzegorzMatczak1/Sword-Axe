@@ -555,6 +555,8 @@ public:
     {
          string skipper;
 
+        clear();
+        
         bool game_end = false;
         bool game_won;
 
@@ -569,9 +571,11 @@ public:
         string enemy_loose_message = enemy.return_loose_message();
 
         int player_hp = 100;
-        int player_dmg ;
-        int player_defence;
+        int player_dmg = 10; //dont forget to add damage and defence things
+        int player_defence = 10;
 
+        clear();
+        
         cout << enemy_name << ": " << enemy_introduction << endl;
         cout << "Type anything to continue: ";
         cin >> skipper;
@@ -581,7 +585,8 @@ public:
         {
             string message;
             string option_attack;
-
+            
+            clear();
 
             cout << "Enemy stats:" << endl;
             cout << "Enemy name: " << enemy_name << endl;
@@ -606,21 +611,28 @@ public:
             {
                 string skipper;
 
-                cout << "You chose attack!" << endl;
+                clear();
+
+                cout << "You chose to attack!" << endl;
                 cout << "Type anything to continue: ";
                 cin >> skipper;
                 cout << endl;
 
                 if(enemy_attack == 0)
                 {
-                    cout << enemy_name <<" chose attack!" << endl;
+
+                    clear();
+                    
+                    cout << enemy_name <<" chose to attack!" << endl;
                     cout << "Type anything to continue: ";
                     cin >> skipper;
                     cout << endl;
                 }
                 else if(enemy_attack == 1)
                 {
-                    cout << enemy_name <<" chose defend!" << endl;
+                    clear();
+                    
+                    cout << enemy_name <<" chose to defend!" << endl;
                     cout << "Type anything to continue: ";
                     cin >> skipper;
                     cout << endl;
@@ -630,7 +642,7 @@ public:
                 if(damage_to_enemy < 0 && enemy_attack == 0) //if defence bigger than attack from player
                 {
                     enemy_hp--;
-                    message = enemy_name + " took only 1 hp of damage because of its huge defence";
+                    message = enemy_name + " took only 1 hp of damage because of their huge defence";
                 }
                 else if(damage_to_enemy < 0 && enemy_attack == 1) //if enemy has huge defence and it chose defend
                 {
@@ -647,6 +659,13 @@ public:
                     message = enemy_name + " takes half of the damage!";
                 }
 
+                clear();
+                
+                show_message(message);
+                cout << "Type anything to continue: ";
+                cin >> skipper;
+                cout << endl;
+
                 int damage_to_player = enemy_damage - player_defence;
                 if(damage_to_player <= 0 && enemy_attack == 0)
                 {
@@ -659,7 +678,12 @@ public:
                     message = enemy_name + " landed a perfect attack!";
                 }
 
+                clear();
+                
                 show_message(message);
+                cout << "Type anything to continue: ";
+                cin >> skipper;
+                cout << endl;
                 //logsMessage = message;
 
 
@@ -681,11 +705,19 @@ public:
                 {
                     message = "Bough you and enemy used defend!";
                 }
+                
+                clear();
+                
                 show_message(message);
+                cout << "Type anything to continue: ";
+                cin >> skipper;
+                cout << endl;
             }
             else if(option_attack[0] == 'G' || option_attack[0] == 'g' || option_attack[0] == '3')
             {
                 string option_give_up;
+
+                clear();
                 
                 cout << "Are you sure you want to give up?" << endl;
                 cout << "1. Yes" << endl;
@@ -704,6 +736,8 @@ public:
                 {
                     string skipper;
 
+                    clear();
+
                     cout << "Game contiues" << endl;
                     
                     cout << "Type anything to continue: ";
@@ -712,10 +746,16 @@ public:
                 }
             }
             else {
+                string skipper;
+
+                clear();
+                
                 cout << "Wrong input! Type attack or defence or their corresponding numers!" << endl;
+                cout << "Type anything to continue: ";
+                cin >> skipper;
+                cout << endl;
             }
-            show_message(message);
-            //logsMessage = message;
+            
             if(player_hp <= 0)
             {
                 game_end = true;
@@ -731,31 +771,44 @@ public:
         if(game_won == true)
         {
             string skipper;
+            
+            clear();
+            
             show_message("You have won!");
             //logsMessage = "You have won!";
             cout << "Type anything to continue: ";
             cin >> skipper;
             cout << endl;
 
+            clear();
+            
             cout << enemy_name << ": " << loose_message << endl;
             cout << "Type anything to continue: ";
             cin >> skipper;
             cout << endl;
+
+            currentOperation = "default";
         }
         else
         {
             string skipper;
+
+            clear();
+            
             show_message("You have lost!");
             //logsMessage = "You have lost!";
             cout << "Type anything to continue: ";
             cin >> skipper;
             cout << endl;
 
+            clear();
             
             cout << enemy_name << ": " << win_message << endl;
             cout << "Type anything to continue: ";
             cin >> skipper;
             cout << endl;
+
+            currentOperation = "default";
         }
     }
 
@@ -770,7 +823,7 @@ public:
         enemy_list[2] = Enemy("Walter", 1000, 50, 30, "Chemistry is the studdy of matter, but I prefer to see it as the study of change.", "Rememer to wear a respirator when cooking :3", "I am proud of you! You can cook now, all by yourself!"); //:). I had to do it
         enemy_list[3] = Enemy("Sigma", 1, 1, 1, "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", ":(");
         enemy_list[4] = Enemy("Elf", 50, 20, 5, "I will pierce you with my bow and arrow, and then I will finish you with my sword", "You didn't even stand a chance. Poor you", "Impossible...");
-        enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zord did what he said he would do");
+        enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zork did what he said he would do");
         enemy_list[6] = Enemy("Barbarrian", 60, 40, 2, "I will make you into thin slices with my swords", "Barbarrian has cut you into chips", "How did you even.. NOOOOOOOO");
         enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME (Destiny is his sword)");
         enemy_list[8] = Enemy("Mage", 6, 100, 0, "FIREBALL", "HAHAHAHAHA! FIREBALL! FIREBALL! F I R E B A L L", "Died 1d4 Introverted"); //Died of emotional damage 💀
@@ -780,7 +833,7 @@ public:
         enemy_list[12] = Enemy("Gnome", 10, 3, 1, "OOH!", "YAHOOOO", ":(");
         enemy_list[13] = Enemy("Executioneer", 120, 34, 7, "Can you place your head on that stand, please. It won't hurt", "Tank you for listening *cuts your head off*", "WHY ARENT YOU LISTENING TO ME *Impales himself on his axe*");
         enemy_list[14] = Enemy("Miner", 65, 15, 4, "I was strong back in my days. But the coal dust made me weak.", "Thought i would be dead. But I was wrong", "Finally peace! Thank you");
-        enemy_list[15] = Enemy("Archer", 50, 50, 0, "Meet my bow and arrow! With them you will have a huge hole in your forhead", "360 NOSCOPE HEADSHOT", "*You dodged his arrow* Whelp good game");
+        enemy_list[15] = Enemy("Archer", 50, 50, 0, "I have never missed a shot in my life", "360 NOSCOPE HEADSHOT", "*You dodged his arrow* Whelp good game");
         enemy_list[16] = Enemy("Hunter", 130, 39, 16, "You are my pray! This will be an easy fight", "You will do as a nice decoration to my wall", "NOOOO! PlEaSe DoN't KiiL mE!");
         enemy_list[17] = Enemy("Bear", 250, 35, 17, "ROOAR *translation: LEAVE MY KIDS ALONE!*", "ROAAR *translation: THATS WHAT YOU GET FOR GETTING CLOSE TO MY KIDS*", "roar? *translation: Who will protect my little brarcubs now?*");
         enemy_list[18] = Enemy("Mugger", 110, 15, 9, "I will mugg ya", "HA HA MUGGED", ":( all I wanted is to mug you");
