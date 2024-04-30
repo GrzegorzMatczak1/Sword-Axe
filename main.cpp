@@ -19,7 +19,7 @@
 
 using namespace std;
 
-class Enemy //Youll split it later into different files you know
+class Enemy //Youll split it later into different files you know //accualy we will leave it as it is
 {
     string enemy_name;
     string introduction;
