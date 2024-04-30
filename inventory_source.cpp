@@ -92,7 +92,8 @@ void Inventory::display()
             cout << "{" << battle_slots[i]->display_name << "}";
         }
     }
-    cout << endl;
+
+
 }
 
 void Inventory::displayGold()

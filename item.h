@@ -36,19 +36,27 @@ public:
 
     void get_data()
     {
-        cout << "  Name: " << this->name << endl;
-        cout << "  Type: " << this->slot_type << endl;
-        cout << "  Rarity: " << this->rarity << endl;
-        cout << "  Worth: " << this->worth << endl;
-        if (slot_type == "weapon")
+        if(display_name == "")
         {
-            cout << "  Damage: " << this->actual_damage << endl;
+            cout << "This is an empty item!" << endl;
         }
-        else if (slot_type == "general") {}
         else
         {
-            cout << "  Defence: " << this->actual_defence << endl;
+            cout << "  Name: " << name << endl;
+            cout << "  Type: " << slot_type << endl;
+            cout << "  Rarity: " << rarity << endl;
+            cout << "  Worth: " << worth << endl;
+            if (base_damage > 0)
+            {
+                cout << "  Damage: " << actual_damage << endl;
+            }
+            else if (base_defence > 0)
+            {
+                cout << "  Defence: " << actual_defence << endl;
+            }
         }
+
+
     }
 
     void applyToItem()

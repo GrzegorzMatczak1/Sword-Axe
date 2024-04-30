@@ -19,8 +19,8 @@ public:
     map<string, int> gear_slots;
 
     Inventory(int rows = 4, int cols = 9);
-    
-    
+
+
     void fill_row_indexes();
 
 
@@ -28,8 +28,8 @@ public:
 
 
     int get_gear_slot_index(string item_slot_type);
-    
-    
+
+
     void display();
 
 
@@ -37,8 +37,8 @@ public:
 
 
     void add_item(int row_cords, int col_cords, const Item& itemToAdd);
-    
-    
+
+
     auto get_processed_cords(string cords) -> vector<int>;
 
 

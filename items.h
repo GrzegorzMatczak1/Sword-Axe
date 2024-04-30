@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include "item.h"
+#include "time.h"
 
 using namespace std;
 
@@ -34,7 +35,7 @@ public:
 
     Item getRandomItem()
     {
-        return item_list[getRandomIndex()];
+        return item_list[(getRandomIndex() + time(0)) % item_list.size() ];
     }
 
     vector<Item> getItems()
@@ -74,7 +75,7 @@ public:
 
     Item getRandomItem()
     {
-        return weapon_list[getRandomIndex()];
+        return weapon_list[(getRandomIndex() + time(0) + time(0)) % weapon_list.size()];
     }
 };
 
@@ -107,7 +108,7 @@ public:
 
     Item getRandomItem()
     {
-       return shield_list[getRandomIndex()];
+        return shield_list[(getRandomIndex() + time(0) + time(0) + time(0)) % shield_list.size()];
     }
 };
 
@@ -139,7 +140,7 @@ public:
 
     Item getRandomItem()
     {
-        return helmet_list[getRandomIndex()];
+        return helmet_list[(getRandomIndex() + time(0) + time(0) + time(0) + time(0)) % helmet_list.size()];
     }
 };
 
@@ -171,7 +172,7 @@ public:
 
     Item getRandomItem()
     {
-        return chestplate_list[getRandomIndex()];
+        return chestplate_list[(getRandomIndex() + time(0) + time(0) + time(0) + time(0)) % chestplate_list.size()];
     }
 };
 
@@ -203,7 +204,7 @@ public:
 
     Item getRandomItem()
     {
-        return leggins_list[getRandomIndex()];
+        return leggins_list[(getRandomIndex() + time(0) + time(0) + time(0) + time(0) + time(0)) % leggins_list.size()];
     }
 };
 
@@ -235,7 +236,7 @@ public:
 
     Item getRandomItem()
     {
-        return boots_list[getRandomIndex()];
+        return boots_list[(getRandomIndex() + time(0) + time(0) + time(0) + time(0) + time(0) + time(0)) % boots_list.size()];
     }
 };
 

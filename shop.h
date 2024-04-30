@@ -2,6 +2,7 @@
 #define SHOP_H
 #include <iostream>
 #include <map>
+#include <vector>
 #include "item.h"
 #include "items.h"
 #include "inventory.h"
@@ -191,31 +192,39 @@ public:
         return distribution(gen);
     }
 
-    string getRandomItem()
+    string getRandomItem(int repeat)
     {
         int rand = randomNumber();
-        auto getItemName = [](map<int, string> items, int rand) -> string
-        {
-            for (const auto& pair : items)
-            {
-                if (pair.first == rand)
-                {
-                    return pair.second;
-                }
-            }
-            return "Hi";
-        };
 
-        return getItemName(items, rand);
+        int numb = 0;
+
+        for(int i = 0; i <= repeat; i++)
+        {
+            numb += time(0);
+        }
+
+        vector<string> class_list;
+        class_list.push_back("general");
+        class_list.push_back("weapon");
+        class_list.push_back("shield");
+        class_list.push_back("helmet");
+        class_list.push_back("chestplate");
+        class_list.push_back("leggins");
+        class_list.push_back("boots");
+
+        string random_class = class_list[(rand + numb) % class_list.size()];
+
+        return random_class;
     }
 
     void fillShopItems() // assuming shop is fully empty // always do clearShop() first
     {
+        int counter = 0;
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < cols; j++)
             {
-                string randomItem = getRandomItem();
+                string randomItem = getRandomItem(counter);
 
                 if (randomItem == "general")
                 {
@@ -245,6 +254,7 @@ public:
                 {
                     shopItems[i][j] = new Item(B.getRandomItem());
                 }
+                counter++;
             }
         }
     }
