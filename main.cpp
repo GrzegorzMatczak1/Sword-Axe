@@ -787,7 +787,7 @@ public:
             cin >> skipper;
             cout << endl;
 
-            //add gold here :)
+            //add gold here :) + 50 to exact
 
             currentOperation = "default";
         }
