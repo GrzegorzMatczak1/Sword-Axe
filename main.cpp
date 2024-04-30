@@ -825,7 +825,7 @@ public:
         enemy_list[2] = Enemy("Walter", 1000, 50, 30, "Chemistry is the studdy of matter, but I prefer to see it as the study of change.", "Rememer to wear a respirator when cooking :3", "I am proud of you! You can cook now, all by yourself!"); //:). I had to do it
         enemy_list[3] = Enemy("Sigma", 1, 1, 1, "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU", ":(");
         enemy_list[4] = Enemy("Elf", 50, 20, 5, "I will pierce you with my bow and arrow, and then I will finish you with my sword", "You didn't even stand a chance. Poor you", "Impossible...");
-        enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zork did what he said he would do");
+        enemy_list[5] = Enemy("Zork", 160, 40, 11, "Me Zork! Me make human 2 pieces, then me make human to puddle", "Zork did what he said he would do", "ME ZORK ME NOT LOOSEE! NOOOOO! ZORK MUST WIN OR MUM IS NOT HAPPY!");
         enemy_list[6] = Enemy("Barbarrian", 60, 40, 2, "I will make you into thin slices with my swords", "Barbarrian has cut you into chips", "How did you even.. NOOOOOOOO");
         enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME (Destiny is his sword)");
         enemy_list[8] = Enemy("Mage", 6, 100, 0, "FIREBALL", "HAHAHAHAHA! FIREBALL! FIREBALL! F I R E B A L L", "Died 1d4 Introverted"); //Died of emotional damage 💀
