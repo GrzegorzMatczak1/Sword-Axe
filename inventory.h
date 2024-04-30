@@ -34,14 +34,8 @@ public:
 
 
     void displayGold();
-    
-    
-    void increaseGold(int amount);
-    
-    
-    void decreaseGold(int amount);
-    
-    
+
+
     void add_item(int row_cords, int col_cords, const Item& itemToAdd);
     
     
