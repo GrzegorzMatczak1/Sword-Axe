@@ -829,7 +829,7 @@ public:
         enemy_list[6] = Enemy("Barbarrian", 60, 40, 2, "I will make you into thin slices with my swords", "Barbarrian has cut you into chips", "How did you even.. NOOOOOOOO");
         enemy_list[7] = Enemy("Palladin", 50, 20, 12, "My sword will easily cut you in half", "No shield or sword will protect you from my sword of destiny", "NOOO! EVEN DESTINY DIDN'T PROTECT ME (Destiny is his sword)");
         enemy_list[8] = Enemy("Mage", 6, 100, 0, "FIREBALL", "HAHAHAHAHA! FIREBALL! FIREBALL! F I R E B A L L", "Died 1d4 Introverted"); //Died of emotional damage 💀
-        enemy_list[9] = Enemy("Spider", 20, 30, 2, "SSSSKASKKAS *translating: Can I bite you pls? It wont hurt that much :3*", "SKASSA SAKA *translating: Told ya it wont hurt that much. Anywas youll be a tasty snack :3*");
+        enemy_list[9] = Enemy("Spider", 20, 30, 2, "SSSSKASKKAS *translating: Can I bite you pls? It wont hurt that much :3*", "SKASSA SAKA *translating: Told ya it wont hurt that much. Anywas youll be a tasty snack :3*", "*You step on the spider killing it*");
         enemy_list[10] = Enemy("Queen spider", 100, 6, 10, "GET OUT OF MY LAND YOU LITTLE PESSANT!", "SHOULDNT HAVE CAME HERE IN THE FRIST PLACE. NOW LOOK AT YOU! ALL BROKEN AND SMASHED TO THE GROUND", "IMPOSSIBLE! KILLED BY A PESSANT! NOOOOOOOO!");
         enemy_list[11] = Enemy("Greg", 150, 30, 17, "Hi my name is Greg!", "That was a nice battle! Hope there is a cleric nearby.", "Well... Thought i couldn't be beaten. But here we are");
         enemy_list[12] = Enemy("Gnome", 10, 3, 1, "OOH!", "YAHOOOO", ":(");
@@ -848,7 +848,7 @@ public:
         enemy_list[25] = Enemy("Knight", 200, 25, 13, "I am loyal to the king. The best of knights", "Didn't even try", "You are worthy of the fight with the KING!");
         enemy_list[26] = Enemy("Cleric", 50, 10, 7, "I exist just to heal! Not to fight", "Whaa... Impossible! I, I HAVE WON!", "Yea, just kill me. I didn't even stand a chance.");
         enemy_list[27] = Enemy("Wolf", 130, 20, 25, "WOOF! *translating: You will be a tasty snack!*", "AUUUUU! *translating: Letss gooo!/That was easy!*", "wof? *translating: how?*"); //Huge defence because of its agility
-        enemy_list[28] = Enemy("Predator", 400, 60, 40, "*Breaks a stick*", "Collects your skull. Because it was a worthy fight", "*Has a hart attack from your Intimidation*");
+        enemy_list[28] = Enemy("Predator", 400, 60, 40, "*Breaks a stick*", "Collects your skull. Because it was a worthy fight", "*Predator has a hart attack from your Intimidation*");
         enemy_list[29] = Enemy("AMOGUS", 150, 25, 12, "AMOGUS! *translating: PREPRARE FOR DOOM!*", "A... AMOGUS! *translating: YES!... I HAVE WON!/I AM VICRORIOUS*", "amogus. *translating: You were an opponent worthy of fighting*"); //Had a blast of inspiration :3
         enemy_list[30] = Enemy("THE GREAT MOGUS AMOGUS", 300, 49, 21, "AAAAAMMMOOOOGGGGUS! *translating: YOU THINK YOU CAN CHALLANGE ME? THE GREAT MOGUS AMOGUS? THINK TWICE ABOUT THAT!*", "Amogus. *translating: Why you just didn't give up earlier. I wouldn't hurt that much*", "A... MOGUS? *translating: WHAT!.. HOW DID THAT HAPPEN?*");
         enemy_list[31] = Enemy("Impostor", 200, 30, 9, "AMONG US! *translating: I HAVE KILLED ALL OF MY CREW WITH OUT ANYONE NOTICING SO I WILL KILL YOU TOO!*", "AAMOGUS! *translating: I WILL STAY AND ALWAYS BE VICTORIOUS*", "MOGUS!? *translating: HOW DID YOU FIND A PORTAL TO THE OUTER SPACE!?*"); //Just after i started making this character amongus drip remix started playnig on spotify XDDDDDDDd
