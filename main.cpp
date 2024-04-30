@@ -703,7 +703,7 @@ public:
                 }
                 else if(enemy_attack == 1)
                 {
-                    message = "Bough you and enemy used defend!";
+                    message = "Bough you and enemy chose to defend!";
                 }
                 
                 clear();
