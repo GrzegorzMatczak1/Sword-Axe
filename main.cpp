@@ -837,7 +837,7 @@ public:
         enemy_list[14] = Enemy("Miner", 65, 15, 4, "I was strong back in my days. But the coal dust made me weak.", "Thought i would be dead. But I was wrong", "Finally peace! Thank you");
         enemy_list[15] = Enemy("Archer", 50, 50, 0, "I have never missed a shot in my life", "360 NOSCOPE HEADSHOT", "*You dodged his arrow* Whelp good game");
         enemy_list[16] = Enemy("Hunter", 130, 39, 16, "You are my pray! This will be an easy fight", "You will do as a nice decoration to my wall", "NOOOO! PlEaSe DoN't KiiL mE!");
-        enemy_list[17] = Enemy("Bear", 250, 35, 17, "ROOAR *translation: LEAVE MY KIDS ALONE!*", "ROAAR *translation: THATS WHAT YOU GET FOR GETTING CLOSE TO MY KIDS*", "roar? *translation: Who will protect my little brarcubs now?*");
+        enemy_list[17] = Enemy("Bear", 250, 35, 17, "ROOAR *translation: LEAVE MY KIDS ALONE!*", "ROAAR *translation: THATS WHAT YOU GET FOR GETTING CLOSE TO MY KIDS*", "roar? *translation: Who will protect my little bearcubs now?*");
         enemy_list[18] = Enemy("Mugger", 110, 15, 9, "I will mugg ya", "HA HA MUGGED", ":( all I wanted is to mug you");
         enemy_list[19] = Enemy("Priest", 210, 30, 10, "DO NOT CHALLAGNE THE REALITY OF CHRISTIANITY", "CHRISTIANY RULES YOU HERETIC", "WHA... BUT ALL I DID IS ROB POOR PEOPLE");
         enemy_list[20] = Enemy("Hooligan", 70, 10, 3, "What will you do. CrY oN Me? AHHAHAAHAHAH", "PlEaSe DoNt hUrTmE! AHAHAHAA EASY YOU LITTLE PESANT", "WWWWAAAAAAAA! I SHOULD ONLY WIN! HOOOW! WAAAAAAAA!");
